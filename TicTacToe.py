@@ -16,64 +16,59 @@ grid_coords = [[(10,50),(30,50),(50,50)],
 
 
 
-class player:
-    def __innit__(self, name):
-        if name == 'knots':
-            self.name = name
-            self.colour = 2
-
-        if name == 'crosses':
-            self.name = name
-            self.colour = 3
-
-def create_players(player1 = 'knots', player2 = 'crosses'):
-    global knots, crosses
-
-    knots = player(player1)
-    crosses = player(player2)
-
-
-
-"""def grid(size = grid_size):
+def grid(size = grid_size):
     Z = [[0 for x in range(size)] for x in range(size)]
     for axis in range(0, 60):
         Z[axis] [20] = 1  
         Z[axis] [40] = 1  
         Z[20] [axis] = 1 
         Z[40] [axis] = 1
-    return Z"""
+
+        Z[50][41] = 2 #to introduce all cmap colours
+        Z[30][38] = 3
+    return Z
 
 def grid_update(x, y):
-    global grid_boxes, Z
+    global grid_boxes, Z, turn
+
+    if turn == 0:
+        return Z
+    
+    if turn%2 == 0:
+       colour = 2
+    if turn%2 != 0 :
+        colour = 3
 
     if x<20:
         if y < 20:
-            grid_boxes[2][0] = 2
+            grid_boxes[2][0] = colour
         elif y < 40 and y > 20:
-            grid_boxes[2][1] = 2
+            grid_boxes[2][1] = colour
         elif y < 60 and y > 40:
-            grid_boxes[2][2] = 2
+            grid_boxes[2][2] = colour
 
     if x<40 and x>20:
         if y < 20:
-            grid_boxes[1][0] = 2
+            grid_boxes[1][0] = colour
         elif y < 40 and y > 20:
-            grid_boxes[1][1] = 2
+            grid_boxes[1][1] = colour
         elif y < 60 and y > 40:
-            grid_boxes[1][2] = 2
+            grid_boxes[1][2] = colour
 
     if x<60 and x>40:
         if y < 20:
-            grid_boxes[0][0] = 2
+            grid_boxes[0][0] = colour
         elif y < 40 and y > 20:
-            grid_boxes[0][1] = 2
+            grid_boxes[0][1] = colour
         elif y < 60 and y > 40:
-            grid_boxes[0][2] = 2
+            grid_boxes[0][2] = colour
 
     return grid_boxes
 
 def Z_update(size = grid_size, grid = grid_boxes, coords = grid_coords):
-    Z_coords = []
+
+    Z_coords_1 = []
+    Z_coords_2 = []
 
     Z = [[0 for x in range(size)] for x in range(size)]
     for axis in range(0, 60):
@@ -81,18 +76,23 @@ def Z_update(size = grid_size, grid = grid_boxes, coords = grid_coords):
         Z[axis] [40] = 1  
         Z[20] [axis] = 1 
         Z[40] [axis] = 1
+    
 
     for row in range(len(grid)):
         for x in range(3):
             if grid[row][x] == 2:
-                Z_coords.append(coords[row][x])
+                Z_coords_1.append(coords[row][x])
+            elif grid[row][x] == 3:
+                 Z_coords_2.append(coords[row][x])
 
-    for coord in Z_coords:
-        Z[coord[0]][coord[1]] = 1
-    
+    for coord in Z_coords_1:
+        Z[coord[0]][coord[1]] = 2
+    for coord in Z_coords_2:
+        Z[coord[0]][coord[1]] = 3
+
     return Z
 
-def anim_data(frame):    
+def anim_data(frame):  
     Z = Z_update()
     image.set_data(Z)
     return [image]
@@ -105,7 +105,6 @@ def select(event):
     ix, iy= round(event.xdata), round(event.ydata)
 
     grid_boxes = grid_update(x = ix, y = iy)
-    anim_data()
 
 def check_win():
     pass
@@ -119,12 +118,14 @@ print("Crosses go first :3. ")
 
 plt.style.use('_mpl-gallery-nogrid')
 fig, ax = plt.subplots(figsize = (5,5))
-cmap = ListedColormap(["white","black"])
+cmap = ListedColormap(["white","black","powderblue","yellowgreen"])
 
 fig.canvas.mpl_connect('button_press_event', select)
 
-image = ax.imshow(Z_update(), origin = 'upper', cmap=cmap)
-ani = FuncAnimation(fig, anim_data, frames = 100, interval = 200, blit = False)
+image = ax.imshow(grid(), origin = 'upper', cmap=cmap)
+image.set_data(Z_update())
+
+ani = FuncAnimation(fig, anim_data, frames = 100, interval = 100, blit = False)
 plt.show()
 
 print(grid_boxes)
