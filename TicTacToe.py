@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from matplotlib.animation import FuncAnimation
 
+import tkinter as tk
+
 grid_size = 60
 turn = 0
 
@@ -65,7 +67,50 @@ def grid_update(x, y):
 
     return grid_boxes
 
+def print_winner(player):
+    root = tk(screenName=None, baseName=None, className='tk', useTk=1)
+
+def check_win():
+    twos = 0
+    threes = 0
+
+    for row in grid_boxes:
+        if row[0]==3 and row[1]==3 and row[2]==3:
+            print('PLAYER 1 - WIN!')
+            quit()
+        elif row[0]==2 and row[1]==2 and row[2]==2:
+            print('PLAYER 2 - WIN!')
+            print('faulty - 1')
+            quit()
+    
+    for i in range(3):
+        if grid_boxes[0][i]==3 and grid_boxes[0][i]==grid_boxes[1][i] and grid_boxes[1][i]==grid_boxes[2][i]:
+            print('PLAYER 1 - WIN!')
+            quit()
+        if grid_boxes[0][i]==2 and grid_boxes[0][i]==grid_boxes[1][i] and grid_boxes[1][i]==grid_boxes[2][i]:
+            print('PLAYER 2 - WIN!')
+            print('faulty - 2')
+            quit()
+    
+    if grid_boxes[0][0]==3 and grid_boxes[0][0]==grid_boxes[1][1] and grid_boxes[1][1]==grid_boxes[2][2]:
+        print('PLAYER 1 - WIN!')
+        quit()
+    elif grid_boxes[0][0]==2 and grid_boxes[0][0]==grid_boxes[1][1] and grid_boxes[1][1]==grid_boxes[2][2]:
+        print('PLAYER 2 - WIN!')
+        print('faulty - 3')
+        quit()
+
+
+    if grid_boxes[0][2]==3 and grid_boxes[0][2]==grid_boxes[1][1] and grid_boxes[1][1] ==grid_boxes[2][0]:
+        print('PLAYER 1 - WIN!')
+        quit()
+    elif grid_boxes[0][2]==2 and grid_boxes[0][2]==grid_boxes[1][1] and grid_boxes[1][1] ==grid_boxes[2][0]:
+        print('PLAYER 2 - WIN!')
+        print('faulty - 4')
+        quit()
+
 def Z_update(size = grid_size, grid = grid_boxes, coords = grid_coords):
+    global Z_coords_1, Z_coords_2
 
     Z_coords_1 = []
     Z_coords_2 = []
@@ -87,14 +132,20 @@ def Z_update(size = grid_size, grid = grid_boxes, coords = grid_coords):
 
     for coord in Z_coords_1:
         Z[coord[0]][coord[1]] = 2
+    
     for coord in Z_coords_2:
         Z[coord[0]][coord[1]] = 3
+        Z[coord[0]+1][coord[1]+1] = 3
+        Z[coord[0]-1][coord[1]-1] = 3
+        Z[coord[0]-1][coord[1]+1] = 3
+        Z[coord[0]+1][coord[1]-1] = 3
 
     return Z
 
 def anim_data(frame):  
     Z = Z_update()
     image.set_data(Z)
+    check_win()
     return [image]
 
 def select(event):
@@ -106,15 +157,9 @@ def select(event):
 
     grid_boxes = grid_update(x = ix, y = iy)
 
-def check_win():
-    pass
 
 
 
-
-
-
-print("Crosses go first :3. ")
 
 plt.style.use('_mpl-gallery-nogrid')
 fig, ax = plt.subplots(figsize = (5,5))
