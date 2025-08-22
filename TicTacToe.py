@@ -2,12 +2,11 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from matplotlib.animation import FuncAnimation
 import time
-import tkinter as tk
 
 grid_size = 60
 turn = 0
 
-"""Boxes"""
+
 grid_boxes = [[0,0,0], 
               [0,0,0], 
               [0,0,0]]
@@ -15,7 +14,6 @@ grid_boxes = [[0,0,0],
 grid_coords = [[(10,50),(30,50),(50,50)], 
               [(10,30),(30,30),(50,30)], 
               [(10,10),(30,10),(50,10)]]
-
 
 
 def grid(size = grid_size):
@@ -198,9 +196,6 @@ def select(event):
         grid_boxes = grid_update(x = ix, y = iy)
     else:
         pass
-
-
-
 
 
 plt.style.use('_mpl-gallery-nogrid')
