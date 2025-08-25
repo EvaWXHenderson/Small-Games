@@ -74,8 +74,11 @@ def loss_check():
 def Z_update():
     pass
 
-def anim_data():
-    pass
+def run(x):
+    image.set_data(Z_update())
+    
+    ax.set_xticks([])
+    ax.set_yticks([])
 
 plt.style.use('_mpl-gallery-nogrid')
 fig, ax = plt.subplots(figsize = (5,5))
@@ -84,7 +87,6 @@ cmap = ListedColormap(["white","black","yellowgreen"])
 fig.canvas.mpl_connect('key_press_event', keypress)
 
 image = ax.imshow(background(), origin = 'upper', cmap=cmap)
-image.set_data(Z_update())
 
-ani = FuncAnimation(fig, anim_data, frames = 100, interval = 10, blit = False)
+ani = FuncAnimation(fig, run, frames = 100, interval = 10, blit = False)
 plt.show()

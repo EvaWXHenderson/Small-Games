@@ -1,27 +1,19 @@
-import matplotlib as plt
+import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from matplotlib.animation import FuncAnimation
 
-import random as rand
+import time 
 
-grid_size = 60
+grid_size = 61
 delt_t = 0.1
 barrier_s = []
 barrier_t = []
 barrier_b = []
 
-bat_position = [(30,60),(29,60),(31,60)]
+bat_position = [[60,30],[60,29],[60,31]]
 
-ball_position = [(30,59)]
-ball_velocity = [rand.randint(-4, 4), rand.randint(-4, 4)]
-
-
-"""class bat:
-    def __init__(self):
-        global player
-        self.position = [(30,60)] #initial position (as well as [30-1][60], [30+1][60])
-
-        bat_position.append(self.position)"""
+ball_position = [59,30]
+ball_velocity = [-4, 2]
 
 
 def background(size = grid_size):
@@ -45,66 +37,92 @@ def background(size = grid_size):
 def keypress(event):
     global bat_position
 
-    for position in bat_position:
-        if event.key == 'w':
-            new_bat_1 = (position[0][0] + 1, 60)
-            new_bat_2 = (position[0][1] + 1, 60)
-            new_bat_3 = (position[0][2] + 1, 60)
-        if event.key == 's':
-            new_bat_1 = (position[0][0] - 1, 60)
-            new_bat_2 = (position[0][1] - 1, 60)
-            new_bat_3 = (position[0][2] - 1, 60)
+    if event.key == 'i':
+        bat_position = [[60, bat_position[0][1] + 1], [60, bat_position[1][1] + 1], [60, bat_position[2][1] + 1]]
+        print("i pressed - bat up")
+    if event.key == 'k':
+        bat_position = [[60, bat_position[0][1] - 1], [60, bat_position[1][1] - 1], [60, bat_position[2][1] - 1]]
+        print("k pressed - bat down")
         
-        bat_position = [new_bat_1, new_bat_2, new_bat_3]
+    print("new bat position: " + str(bat_position))
 
-def ball_update(position = ball_position, velocity = ball_velocity, t = delt_t):
-    new_x = position[0] + velocity[0] * t
-    new_y = position[1] + velocity[1] * t
+def ball_update():
+    global ball_position, ball_velocity, delt_t
+
+    new_x = ball_position[0] + ball_velocity[0]
+    new_y = ball_position[1] + ball_velocity[1]
     
-    position = (new_x, new_y) #redefined position of ball
+    ball_position = [new_x, new_y] #redefined position of ball
+    
+    if ball_position[0] >= 60:
+        ball_position = [60, new_y]
+    elif ball_position[0] < 0:
+        ball_position = [0, new_y]
+    
+    if ball_position[1] >= 60:
+        ball_position = [new_x, 60]
+    elif ball_position[1] < 0:
+        ball_position = [new_x, 0]   
 
-def collision_check(position = ball_position, velocity = ball_velocity, side = barrier_s, top = barrier_t, bottom = barrier_b):
-    for point in side:
-        if (position[0] - 1, position[1]) == point:
-            velocity[0] = -velocity[0] #inverse x position upon collisions
-    #testing collision with left pannel
+    #print('new position: ' + str(ball_position))
 
-    for point in top:
-        if (position[0], position[1] + 1) == point:
-            velocity[0] = -velocity[1]
-    #testing collision with top pannel
+def collision_check():
+    global ball_position, ball_velocity, barrier_s, barrier_b, barrier_t
+    
+    if ball_position[1] == 60:
+        ball_velocity = [ball_velocity[0],-ball_velocity[1]]
+        #print('velocity change')
+    if ball_position[1] == 0:
+        ball_velocity = [ball_velocity[0],-ball_velocity[1]]
+        #print('velocity change')
 
-    for point in bottom:
-        if (position[0], position[1] - 1) == point:
-            velocity[0] = -velocity[1]
-    #testing collision with bottom pannel
-
-    for point in bat_position:
-        if (position[0] + 1, position[1]) == point:
-            velocity[0] = -velocity[0]     
-    #testing collision with players bat  
-
+    if ball_velocity[0] == 0:
+        ball_velocity = [-ball_velocity[0],ball_velocity[1]]
+        #print('velocity change')
+    if ball_velocity[0] == 60:
+        ball_velocity = [-ball_velocity[0],ball_velocity[1]]
+        #print('velocity change')
+    
+    #print('new velocity: ' + str(ball_velocity))
 
 def loss_check():
-    pass
+    if ball_position[0] > 60:
+        print('You lose! \n Womp. Womp.')
+        time.sleep(2)
+        quit()
 
-def Z_update():
-    for player in player:
-        player.position
+def Z_update(size = grid_size):
+    global barrier, Z
 
-def anim_data():
-    pass
+    Z = [[0 for x in range(size)] for x in range(size)]
+    for axis in range(size):
+        Z[axis][0] = 1
+    
+    for point in bat_position:
+        Z[point[1]][point[0]] = 1
+    
+    Z[round(ball_position[1])][round(ball_position[0])] = 2
 
-#bat()
+    return Z
 
-plt.style.use('_mpl-gallery-nogrid')
+def run(x):
+    ball_update()
+    collision_check()
+    #loss_check()
+        
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+    Z = Z_update()
+    image.set_data(Z)
+
+#plt.style.use('_mpl-gallery-nogrid')
 fig, ax = plt.subplots(figsize = (5,5))
 cmap = ListedColormap(["white","black","powderblue"])
 
 fig.canvas.mpl_connect('key_press_event', keypress)
 
 image = ax.imshow(background(), origin = 'upper', cmap=cmap)
-image.set_data(Z_update())
 
-ani = FuncAnimation(fig, anim_data, frames = 100, interval = 10, blit = False)
+ani = FuncAnimation(fig, run, frames = 100, interval = 10, blit = False)
 plt.show()
