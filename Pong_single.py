@@ -4,16 +4,18 @@ from matplotlib.animation import FuncAnimation
 
 import time 
 
+"""Z coordinate system inverted, when indexing Z array, always done so: Z[y][x]"""
+
 grid_size = 61
-delt_t = 0.1
+delt_t = 1
 barrier_s = []
 barrier_t = []
 barrier_b = []
 
-bat_position = [[60,30],[60,29],[60,31]]
+bat_position = [[60,30],[60,28],[60,29],[60,31],[60,32]]
 
 ball_position = [59,30]
-ball_velocity = [-4, 2]
+ball_velocity = [-3, 1]
 
 
 def background(size = grid_size):
@@ -37,53 +39,44 @@ def background(size = grid_size):
 def keypress(event):
     global bat_position
 
-    if event.key == 'i':
-        bat_position = [[60, bat_position[0][1] + 1], [60, bat_position[1][1] + 1], [60, bat_position[2][1] + 1]]
-        print("i pressed - bat up")
-    if event.key == 'k':
-        bat_position = [[60, bat_position[0][1] - 1], [60, bat_position[1][1] - 1], [60, bat_position[2][1] - 1]]
-        print("k pressed - bat down")
-        
-    print("new bat position: " + str(bat_position))
+    if event.key == 'down':
+        bat_position = [[60, bat_position[0][1] + 1], [60, bat_position[1][1] + 1], [60, bat_position[2][1] + 1], [60, bat_position[3][1] + 1], [60, bat_position[4][1] + 1]]
+    if event.key == 'up':
+        bat_position = [[60, bat_position[0][1] - 1], [60, bat_position[1][1] - 1], [60, bat_position[2][1] - 1], [60, bat_position[3][1] - 1], [60, bat_position[4][1] - 1]]
 
 def ball_update():
     global ball_position, ball_velocity, delt_t
 
-    new_x = ball_position[0] + ball_velocity[0]
-    new_y = ball_position[1] + ball_velocity[1]
-    
-    ball_position = [new_x, new_y] #redefined position of ball
-    
-    if ball_position[0] >= 60:
-        ball_position = [60, new_y]
-    elif ball_position[0] < 0:
-        ball_position = [0, new_y]
-    
-    if ball_position[1] >= 60:
-        ball_position = [new_x, 60]
-    elif ball_position[1] < 0:
-        ball_position = [new_x, 0]   
+    new_x = ball_position[0] + ball_velocity[0] * delt_t
+    new_y = ball_position[1] + ball_velocity[1] * delt_t
 
-    #print('new position: ' + str(ball_position))
+    if new_x > 60:
+        new_x = 60
+    elif new_x < 0:
+        new_x = 0
+    
+    if new_y > 60:
+        new_y = 60
+    elif new_y < 0:
+        new_y = 0  
+
+    ball_position = [new_x, new_y] #redefined position of ball
 
 def collision_check():
     global ball_position, ball_velocity, barrier_s, barrier_b, barrier_t
     
-    if ball_position[1] == 60:
-        ball_velocity = [ball_velocity[0],-ball_velocity[1]]
-        #print('velocity change')
-    if ball_position[1] == 0:
-        ball_velocity = [ball_velocity[0],-ball_velocity[1]]
-        #print('velocity change')
+    if ball_position[0] >= 60:
+        ball_velocity = [-ball_velocity[0],ball_velocity[1]]
+    elif ball_position[0] <= 0:
+        ball_velocity = [-ball_velocity[0],ball_velocity[1]]
 
-    if ball_velocity[0] == 0:
-        ball_velocity = [-ball_velocity[0],ball_velocity[1]]
-        #print('velocity change')
-    if ball_velocity[0] == 60:
-        ball_velocity = [-ball_velocity[0],ball_velocity[1]]
-        #print('velocity change')
-    
-    #print('new velocity: ' + str(ball_velocity))
+    elif ball_position[1] >= 60:
+        ball_velocity = [ball_velocity[0],-ball_velocity[1]]
+    elif ball_position[1] <= 0:
+        ball_velocity = [ball_velocity[0],-ball_velocity[1]]
+
+    for point in bat_position:
+        pass
 
 def loss_check():
     if ball_position[0] > 60:
@@ -116,7 +109,7 @@ def run(x):
     Z = Z_update()
     image.set_data(Z)
 
-#plt.style.use('_mpl-gallery-nogrid')
+
 fig, ax = plt.subplots(figsize = (5,5))
 cmap = ListedColormap(["white","black","powderblue"])
 
