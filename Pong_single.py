@@ -15,7 +15,7 @@ barrier_g = []
 bat_position = [[60,30],[60,28],[60,29],[60,31],[60,32]]
 
 ball_position = [59,30]
-ball_velocity = [-rand.randint(1,4), rand.randint(1,4)]
+ball_velocity = [-rand.randint(2,4), rand.randint(2,4)]
 
 
 def background(size = grid_size):
@@ -84,39 +84,46 @@ def ball_update():
 
 def collision_check():
     global ball_position, ball_velocity, bat_position, loss
-    
-    #if ball_position[0] >= 60:
-        #ball_velocity = [-ball_velocity[0], ball_velocity[1]]
+
+    rounded_ball = [round(ball_position[0]), round(ball_position[1])]
     
     if ball_position[0] <= 0:
-        ball_velocity = [-ball_velocity[0], ball_velocity[1]]
-    
+        ball_velocity = [-ball_velocity[0], ball_velocity[1]]  
     elif ball_position[0] >= 60:
         for point in barrier_g:
             if ball_position[1] == point[1]:
                 ball_velocity = [-ball_velocity[0], ball_velocity[1]]
 
+
     elif ball_position[1] >= 60:
-        ball_velocity = [ball_velocity[0], -ball_velocity[1]]
-    
+        ball_velocity = [ball_velocity[0], -ball_velocity[1]]   
     elif ball_position[1] <= 0:
         ball_velocity = [ball_velocity[0], -ball_velocity[1]]
 
+
     for point in bat_position:
-        if ball_position[0]==point[0] and ball_position[1]==point[1]:
+        if rounded_ball[0]==point[0] and rounded_ball[1]==point[1]:
             ball_velocity = [-ball_velocity[0], ball_velocity[1]]
-            print('hit bat')
 
 def loss_check():
+    global ball_position, barrier_g, bat_position
+
     loss = True
 
     for point in barrier_g:
         if ball_position[1] == point[1]:
             loss = False
+
+    for point in bat_position:
+        if ball_position[1] == point[1]:
+            loss = False
+            
         
     if loss == True and ball_position[0] >= 60:
         image.set_data(Z)
         print('You lose! \n Womp. Womp.')
+        print('ball position: ' + str(ball_position))
+        print('bat position: ' + str(bat_position))
         time.sleep(2)
         quit()
 
