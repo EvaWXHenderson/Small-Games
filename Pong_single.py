@@ -141,7 +141,7 @@ def Z_update(size = grid_size):
 def run(x):
     ball_update()
     collision_check()
-    #loss_check()
+    loss_check()
         
     ax.set_xticks([])
     ax.set_yticks([])
