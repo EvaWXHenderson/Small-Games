@@ -1,86 +1,168 @@
-import matplotlib as plt
+import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from matplotlib.animation import FuncAnimation
 
+import time
 import random as rand
 
-grid_size = 60
-delt_t = 0.1
+"""Z coordinate system inverted, when indexing Z array, always done so: Z[y][x]"""
+
+grid_size = 61
+delt_t = 0.5
 barrier_t = []
 barrier_b = []
 
-bat_position1 = [(30,60),(29,60),(31,60)]
-bat_position2 = [(30,0),(29,0),(31,0)]
+bat_position1 = [[60,30],[60,28],[60,29],[60,31],[60,32]]
+bat_position2 = [[0,30],[0,28],[0,29],[0,31],[0,32]]
 
-ball_position = [(30,59)]
-ball_velocity = [rand.randint(-4, 4), rand.randint(-4, 4)]
+ball_position = [59,30]
+ball_velocity = [-rand.randint(2,4), rand.randint(2,4)]
+
 
 def background(size = grid_size):
     global barrier_m, barrier_t, barrier_b
 
     Z = [[0 for x in range(size)] for x in range(size)]
     for axis in range(size):
-        Z[axis][30] = 1
-        barrier_t.append((axis,0)) #bottom
-        barrier_b.append((axis,60)) #top
+        Z[0][axis] = 1
+        Z[60][axis] = 1
     
+    Z[28][60] = 1
     Z[29][60] = 1
     Z[30][60] = 1
     Z[31][60] = 1
+    Z[32][60] = 1
 
+    Z[28][0] = 1
     Z[29][0] = 1
     Z[30][0] = 1
     Z[31][0] = 1
+    Z[32][0] = 1
 
     Z[30][59] = 2
-    Z[30][1] = 3
+
+    ax.set_xticks([])
+    ax.set_yticks([])
     
     return Z
 
 def keypress(event):
+    global bat_position1, bat_position2
+
+    if event.key == 'down':
+        bat_position1 = [[60, bat_position1[0][1] + 2], [60, bat_position1[1][1] + 2], [60, bat_position1[2][1] + 2], [60, bat_position1[3][1] + 2], [60, bat_position1[4][1] + 2]]
+    if event.key == 'up':
+        bat_position1 = [[60, bat_position1[0][1] - 2], [60, bat_position1[1][1] - 2], [60, bat_position1[2][1] - 2], [60, bat_position1[3][1] - 2], [60, bat_position1[4][1] - 2]]
+
+    if event.key == 'd':
+        bat_position2 = [[0, bat_position2[0][1] + 2], [0, bat_position2[1][1] + 2], [0, bat_position2[2][1] + 2], [0, bat_position2[3][1] + 2], [0, bat_position2[4][1] + 2]]
     if event.key == 'w':
-        pass
-    if event.key == 's':
-        pass
+        bat_position2 = [[0, bat_position2[0][1] - 2], [0, bat_position2[1][1] - 2], [0, bat_position2[2][1] - 2], [0, bat_position2[3][1] - 2], [0, bat_position2[4][1] - 2]]
 
 def ball_update(position = ball_position, velocity = ball_velocity, t = delt_t):
-    new_x = position[0] + velocity[0] * t
-    new_y = position[1] + velocity[1] * t
+    global ball_position, ball_velocity, delt_t
+
+    new_x = ball_position[0] + ball_velocity[0] * delt_t
+    new_y = ball_position[1] + ball_velocity[1] * delt_t
     
-    position = (new_x, new_y) #redefined position of ball
+    if new_x > 60:
+        new_x = 60
+    elif new_x < 0:
+        new_x = 0
+    
+    if new_y > 60:
+        new_y = 60
+    elif new_y < 0:
+        new_y = 0  
 
-def collision_check(bat1 = bat_position1, bat2 = bat_position2, position = ball_position, velocity = ball_velocity, top = barrier_t, bottom = barrier_b):    
-    for point in top:
-        if (position[0], position[1] + 1) == point:
-            velocity[0] = -velocity[1]
+    ball_position = [new_x, new_y] #redefined position of ball
 
-    for point in bottom:
-        if (position[0], position[1] - 1) == point:
-            velocity[0] = -velocity[1]
+def collision_check():   
+    global ball_position, ball_velocity, bat_position, loss
 
-    for point in bat1:
-        if (position[0] + 1, position[1]) == point:
-            velocity[0] = -velocity[0]     
-    #testing collision with player 1 bat  
+    rounded_ball = [round(ball_position[0]), round(ball_position[1])]
 
-    for point in bat2:
-        if (position[0] + 1, position[1]) == point:
-            velocity[0] = -velocity[0] 
-    #testing collision with player 1 bat
+#for testing without ending/losing game:
+    #if ball_position[0] >= 60:
+        #print('hit RHS')
+        #ball_velocity = [-ball_velocity[0],ball_velocity[1]]
+    #if ball_position[1] <= 0:
+        #print('hit LHS')
+        #ball_velocity = [-ball_velocity[0],ball_velocity[1]]
+###
+    
+    if ball_position[1] >= 60: #hits top
+        ball_velocity = [ball_velocity[0],-ball_velocity[1]]
+
+    if ball_position[1] <= 0: #hits bottom
+        ball_velocity = [ball_velocity[0],-ball_velocity[1]]
+
+    for point in bat_position1: #hits bat of RHP - player1
+        if rounded_ball[0]==point[0] and rounded_ball[1]==point[1]:
+            ball_velocity = [-ball_velocity[0], ball_velocity[1]]
+
+    for point in bat_position2: #hits bat of LHP - player2
+        if rounded_ball[0]==point[0] and rounded_ball[1]==point[1]:
+            ball_velocity = [-ball_velocity[0], ball_velocity[1]]
 
 def loss_check():
-    pass
+    global ball_position, bat_position2, bat_position1, Z
 
-def Z_update():
-    pass
+    loss = True
+
+    for point in bat_position1:
+        if ball_position[1] == point[1]:
+            loss = False
+    
+    for point in bat_position2:
+        if ball_position[1] == point[1]:
+            loss = False
+
+    if ball_position[0] >= 60 and loss == True:
+        print('Player 2 loses! \n Womp. Womp.') #LHS player
+        print(ball_position)
+        print(bat_position2)
+        image.set_data(Z)
+        time.sleep(2)
+        quit()
+    
+    if ball_position[0] <= 0 and loss == True:
+        print('Player 1 loses! \n Womp. Womp.') #RHS player
+        print(ball_position)
+        print(bat_position1)
+        image.set_data(Z)
+        time.sleep(2)
+        quit()
+
+def Z_update(size = grid_size):
+    global barrier, Z
+
+    Z = [[0 for x in range(size)] for x in range(size)]
+    for axis in range(size):
+        Z[0][axis] = 1
+        Z[60][axis] = 1
+    
+    for point in bat_position1:
+        Z[point[1]][point[0]] = 1
+    for point in bat_position2:
+        Z[point[1]][point[0]] = 1
+    
+    Z[round(ball_position[1])][round(ball_position[0])] = 2
+
+    return Z
 
 def run(x):
-    image.set_data(Z_update())
-    
+    ball_update()
+    collision_check()
+    loss_check()
+        
     ax.set_xticks([])
     ax.set_yticks([])
 
-plt.style.use('_mpl-gallery-nogrid')
+    Z = Z_update()
+    image.set_data(Z)
+
+
 fig, ax = plt.subplots(figsize = (5,5))
 cmap = ListedColormap(["white","black","yellowgreen"])
 
