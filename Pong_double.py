@@ -8,7 +8,7 @@ import random as rand
 """Z coordinate system inverted, when indexing Z array, always done so: Z[y][x]"""
 
 grid_size = 61
-delt_t = 0.5
+delt_t = 0.2
 barrier_t = []
 barrier_b = []
 
@@ -17,6 +17,8 @@ bat_position2 = [[0,30],[0,28],[0,29],[0,31],[0,32]]
 
 ball_position = [59,30]
 ball_velocity = [-rand.randint(2,4), rand.randint(2,4)]
+
+speed_change = False
 
 
 def background(size = grid_size):
@@ -54,7 +56,7 @@ def keypress(event):
     if event.key == 'up':
         bat_position1 = [[60, bat_position1[0][1] - 2], [60, bat_position1[1][1] - 2], [60, bat_position1[2][1] - 2], [60, bat_position1[3][1] - 2], [60, bat_position1[4][1] - 2]]
 
-    if event.key == 'd':
+    if event.key == 's':
         bat_position2 = [[0, bat_position2[0][1] + 2], [0, bat_position2[1][1] + 2], [0, bat_position2[2][1] + 2], [0, bat_position2[3][1] + 2], [0, bat_position2[4][1] + 2]]
     if event.key == 'w':
         bat_position2 = [[0, bat_position2[0][1] - 2], [0, bat_position2[1][1] - 2], [0, bat_position2[2][1] - 2], [0, bat_position2[3][1] - 2], [0, bat_position2[4][1] - 2]]
@@ -78,9 +80,10 @@ def ball_update(position = ball_position, velocity = ball_velocity, t = delt_t):
     ball_position = [new_x, new_y] #redefined position of ball
 
 def collision_check():   
-    global ball_position, ball_velocity, bat_position, loss
+    global ball_position, ball_velocity, bat_position, loss, speed_change
 
     rounded_ball = [round(ball_position[0]), round(ball_position[1])]
+    bat_collision = False
 
 #for testing without ending/losing game:
     #if ball_position[0] >= 60:
@@ -100,10 +103,31 @@ def collision_check():
     for point in bat_position1: #hits bat of RHP - player1
         if rounded_ball[0]==point[0] and rounded_ball[1]==point[1]:
             ball_velocity = [-ball_velocity[0], ball_velocity[1]]
+            bat_collision = True
 
     for point in bat_position2: #hits bat of LHP - player2
         if rounded_ball[0]==point[0] and rounded_ball[1]==point[1]:
             ball_velocity = [-ball_velocity[0], ball_velocity[1]]
+            bat_collision = True
+
+    if bat_collision == True:
+        speed_change = True
+        print('speed change')
+    if bat_collision == False:
+        speed_change = False
+
+def speed():
+    global speed_change, delt_t
+
+    if speed_change == True:
+        delt_t = 0.4
+
+def speed_decay():
+    global delt_t
+
+    if delt_t > 0.2:
+        delt_t -= 0.005
+        print(delt_t)
 
 def loss_check():
     global ball_position, bat_position2, bat_position1, Z
@@ -121,7 +145,7 @@ def loss_check():
     if ball_position[0] >= 60 and loss == True:
         print('Player 2 loses! \n Womp. Womp.') #LHS player
         print(ball_position)
-        print(bat_position2)
+        print(bat_position1)
         image.set_data(Z)
         time.sleep(2)
         quit()
@@ -129,7 +153,7 @@ def loss_check():
     if ball_position[0] <= 0 and loss == True:
         print('Player 1 loses! \n Womp. Womp.') #RHS player
         print(ball_position)
-        print(bat_position1)
+        print(bat_position2)
         image.set_data(Z)
         time.sleep(2)
         quit()
@@ -154,7 +178,10 @@ def Z_update(size = grid_size):
 def run(x):
     ball_update()
     collision_check()
+    speed()
     loss_check()
+
+    speed_decay()
         
     ax.set_xticks([])
     ax.set_yticks([])
@@ -163,6 +190,11 @@ def run(x):
     image.set_data(Z)
 
 
+
+
+
+
+plt.rcParams['keymap.save'].remove('s')
 fig, ax = plt.subplots(figsize = (5,5))
 cmap = ListedColormap(["white","black","yellowgreen"])
 
