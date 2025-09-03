@@ -15,9 +15,11 @@ A game of single-player pong. A ball hits off of the edges of the window, player
 
 Ball speeds up upon being hit by a players bat, speed slows down as it moves.
 
-**Keys:**    
-Bat up = up key    
-Bat down = down key    
+**Keys:**
+|Bat up  |Bat down |
+| ---    | ---     |
+|up      |down     |
+  
 ### Double-player
 ![](https://github.com/EvaWXHenderson/Small-Games/blob/main/images/Pong%20double.gif)
 
@@ -26,10 +28,10 @@ A game of two-player pong. A ball hits off of the top and bottom sides of the wi
 Ball speeds up upon being hit by a players bat, speed slows down as it moves.
 
 **Keys:**    
-player 1:    
-Bat up = w   
-Bat down = s
+|        | player 1 | player 2 |
+| ---    | ---      | ---      |
+|Bat up  | w        | up       |
+|Bat down| s        | down     |
 
-player 2:    
-Bat up = up key    
-Bat down = down key
+
+## Tetris
