@@ -2,115 +2,94 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from matplotlib.animation import FuncAnimation
 
-import time 
 import random as rand
 
 grid_size = 21
 delt_t = 0.3
 
-def O(centre, info):
-    check_list_entry(centre)
+filled_tiles = []
+screen_shapes = []
 
-    points_O = [centre, [centre[0]+1, centre[1]], [centre[0], centre[1]+1], [centre[0]+1, centre[1]+1]] #centre is bottom left cube
-    colour = 1
-    if info == 'points':
-        return points_O
-    if info == 'colour':
-        return colour
-def I(centre, info):
-    check_list_entry(centre)
+class Shape:
+    def __init__(self, type):
+        if type == 'O':
+            self.centre = [10,10]
 
-    points_I = [centre, [centre[0],centre[1]+1], [centre[0],centre[1]+2], [centre[0],centre[1]+3]] #centre is bottom tile
-    colour = 2
+            self.conformations = [[self.centre, [self.centre[0]+1, self.centre[1]], [self.centre[0], self.centre[1]+1], [self.centre[0]+1, self.centre[1]+1]]]
+            self.colour = 1
+        
+            screen_shapes.append(self)
 
-    if info == 'points':
-        return points_I
-    if info == 'colour':
-        return colour
-def T(centre, info):
-    check_list_entry(centre)
+        if type == 'I':
+            self.centre = [10,10]
 
-    points_T = [centre, [centre[0]-1, centre[1]], [centre[0]+1, centre[1]], [centre[0], centre[1]+1]] #centre is middle tile
-    colour = 3
+            self.conformations =[[self.centre, [self.centre[0],self.centre[1]+1], [self.centre[0],self.centre[1]+2], [self.centre[0],self.centre[1]+3]],
+                                 [self.centre, [self.centre[0]+1,self.centre[1]], [self.centre[0]+2,self.centre[1]], [self.centre[0]+3,self.centre[1]]]]
+            self.colour = 2
 
-    if info == 'points':
-        return points_T
-    if info == 'colour':
-        return colour
-def L(centre, info):
-    check_list_entry(centre)
+            screen_shapes.append(self)
 
-    points_L = [centre, [centre[0]+1, centre[1]], [centre[0], centre[1]+1], [centre[0], centre[1]+2]] #centre is tile before bend
-    colour = 4
+        if type == 'T':
+            self.centre = [10,10]
 
-    if info == 'points':
-        return points_L
-    if info == 'colour':
-        return colour
-def J(centre, info):
-    check_list_entry(centre)
+            self.conformations = [[self.centre, [self.centre[0]-1, self.centre[1]], [self.centre[0]+1, self.centre[1]], [self.centre[0], self.centre[1]+1]],
+                                  [self.centre,[self.centre[0], self.centre[1]+1], [self.centre[0], self.centre[1]-1], [self.centre[0]+1, self.centre[1]]],
+                                  [self.centre,[self.centre[0]-1, self.centre[1]], [self.centre[0]+1, self.centre[1]], [self.centre[0], self.centre[1]-1]],
+                                  [self.centre,[self.centre[0]-1, self.centre[1]], [self.centre[0], self.centre[1]-1], [self.centre[0], self.centre[1]+1]]]
+            self.colour = 3
 
-    points_J = [centre, [centre[0]-1, centre[1]], [centre[0], centre[1]+1], [centre[0], centre[1]+2]]
-    colour = 5
+            screen_shapes.append(self)
 
-    if info == 'points':
-        return points_J
-    if info == 'colour':
-        return colour
-def z(centre, info):
-    check_list_entry(centre)
+        if type == 'L':
+            self.centre = [10,10]
 
-    points_Z = [centre, [centre[0], centre[1]-1], [centre[0]-1, centre[1]], [centre[0]-1, centre[1]+1]]
-    colour = 6
+            self.conformations = [[self.centre, [self.centre[0], self.centre[1]-1], [self.centre[0], self.centre[1]+1], [self.centre[0]-1, self.centre[1]-1]],
+                                  [self.centre, [self.centre[0]-1, self.centre[1]], [self.centre[0]+1, self.centre[1]], [self.centre[0]-1, self.centre[1]+1]],
+                                  [self.centre, [self.centre[0]+1, self.centre[1]+1], [self.centre[0], self.centre[1]+1], [self.centre[0], self.centre[1]-1]],
+                                  [self.centre, [self.centre[0]-1, self.centre[1]], [self.centre[0]+1, self.centre[1]-1], [self.centre[0]+1, self.centre[1]]]]
+            self.colour = 4
 
-    if info == 'points':
-        return points_Z
-    if info == 'colour':
-        return colour
-def S(centre, info):
-    check_list_entry(centre)
+            screen_shapes.append(self)
 
-    points_S = [centre, [centre[0], centre[1]-1], [centre[0]+1, centre[1]], [centre[0]+1, centre[1]+1]]
-    colour = 7
+        if type == 'J':
+            self.centre = [10,10]
 
-    if info == 'points':
-        return points_S
-    if info == 'colour':
-        return colour
+            self.conformations = [[self.centre, [self.centre[0]+1, self.centre[1]-1], [self.centre[0], self.centre[1]+1], [self.centre[0], self.centre[1]-1]],
+                                  [self.centre, [self.centre[0]-1, self.centre[1]-1], [self.centre[0]-1, self.centre[1]], [self.centre[0]+1, self.centre[1]]],
+                                  [self.centre, [self.centre[0]-1, self.centre[1]+1], [self.centre[0], self.centre[1]+1], [self.centre[0], self.centre[1]-1]],
+                                  [self.centre, [self.centre[0]+1, self.centre[1]], [self.centre[0]+1, self.centre[1]+1], [self.centre[0]-1, self.centre[1]]]]
+            self.colour = 5
 
-def draw(centre_, shape, screen):
+            screen_shapes.append(self)
+        
+        if type == 'z':
+            self.centre = [10,10]
 
-    if shape == O:
-        points = O(centre_, info = 'points')
-        colour = O(centre_, info = 'colour')
+            self.conformations = [[self.centre, [self.centre[0], self.centre[1]-1], [self.centre[0]-1, self.centre[1]], [self.centre[0]-1, self.centre[1]+1]],
+                                  [self.centre, [self.centre[0], self.centre[1]-1], [self.centre[0]-1, self.centre[1]-1], [self.centre[0]+1, self.centre[1]]]]
+            self.colour = 6
 
-    elif shape == I:
-        points = I(centre_,info = 'points')
-        colour = I(centre_, info = 'colour')
+            screen_shapes.append(self)
 
-    elif shape == T:
-        points = T(centre_, info = 'points')  
-        colour = T(centre_, info = 'colour')
+        if type == 'S':
+            self.centre = [10,10]
+            
+            self.conformations = [[self.centre, [self.centre[0], self.centre[1]-1], [self.centre[0]+1, self.centre[1]], [self.centre[0]+1, self.centre[1]+1]],
+                                  [self.centre, [self.centre[0]+1, self.centre[1]], [self.centre[0]-1, self.centre[1]+1], [self.centre[0], self.centre[1]+1]]]
+            self.colour = 7
 
-    elif shape == L:
-        points = L(centre_, info = 'points')
-        colour = L(centre_, info = 'colour')
+            screen_shapes.append(self)
 
-    elif shape == J:
-        points = J(centre_, info = 'points')
-        colour = J(centre_, info = 'colour')
 
-    elif shape == z:
-        points = z(centre_, info = 'points')
-        colour = z(centre_, info = 'colour')
 
-    elif shape == S:
-        points = S(centre_, info = 'points')
-        colour = S(centre_, info = 'colour')
+"""for drawing shapes and assigning colours""" 
+def draw(shape, form, screen):
+    points = shape.conformation[form] #a list of points corresponding to desired conformation (form)
+    colour = shape.colour #an integer colour output (1-7)
 
-    for coords in points: #points returns a list of lists (a list of tuples hopefully)
-        print(points)
+    for coords in points:
         screen[coords[1]][coords[0]] = colour
+
 
 
 def check_list_entry(centre):
@@ -129,10 +108,91 @@ def background(size = grid_size):
     Z[0][6] = 6
     Z[0][7] = 7
 
+    #draw(centre_ = [10,10], shape = z, screen=Z)
+
     ax.set_xticks([])
     ax.set_yticks([])
     
     return Z
+
+def movement(centre_, shape):
+    pass
+    #shapes move down at a rate of delta t 
+
+def rotation(shape, centre_, conformation):
+    #create list of conformations - for every up click, the next conformation is chosen
+    if shape == I:
+        conformations = I(info = 'conformations')
+        if conformation == 0:
+            form = conformations[0]
+        if conformation == 1:
+            form = conformations[1]
+        #I has only 1 other conformation
+    
+    elif shape == T:
+        centre_ = T(info = 'points')
+        conformations = T(info = 'conformations')
+        if conformation == 0:
+            form = conformations[0]        
+        if conformation == 1:
+            form = conformations[1]
+        elif conformation == 2:
+            form = conformations[2]
+        elif conformation == 3:
+            form = conformations[3]
+
+        #T has 4 conformations (3 other)
+    
+    elif shape == L:
+        centre_ = L(info = 'points')
+        conformations = L(info = 'conformations')
+        if conformation == 0:
+            form = conformations[0]
+        if conformation == 1:
+            form = conformations[1]
+        elif conformation == 2:
+            form = conformations[2]
+        elif conformation == 3:
+            form = conformations[3]
+
+        #L has 4 conformations (3 other)
+    
+    elif shape == J:
+        centre_ = J(info = 'points')
+        conformations = J(info = 'conformations')
+        if conformation == 0:
+            form = conformations[0]
+        if conformation == 1:
+            form = conformations[1]
+        elif conformation == 2:
+            form = conformations[2]
+        elif conformation == 3:
+            form = conformations[3]
+
+        #J has 4 conformations (3 other)
+    
+    elif shape == z:
+        centre_ = z(info = 'points')
+        conformations = z(info = 'conformations')
+        if conformation == 0:
+            form = conformations[0]
+        if conformation == 1:
+            form = conformations[1]
+
+        #z has 4 conformations (3 other)
+    
+    elif shape == S:
+        centre_ = S(info = 'points')
+        conformations = S(info = 'conformations')
+        if conformation == 0:
+            form = conformations[0]
+        if conformation == 1:
+            form = conformations[1]
+
+        #S has 4 conformations (3 other)
+    
+    return form
+    #rotation of shape when up pressed - gets points for the form wanted to then input into the draw function...
 
 def keypress(event):
     if event.key == 'space':
@@ -142,17 +202,44 @@ def keypress(event):
         pass
         #speed up placement
     if event.key == 'up':
-        pass
-        #rotation
+        counter += 1
+        rotation(conformation = counter)
+        #rotation - needs shape input and centre input - O shape has no rotation
 
-def line_break():
+"""def line_break():
+    for x in range(grid_size):
+        for y in range(grid_size):
+            if Z[x][y] == 0:
     pass
-    #if whole line is filled/complete whole line erases
+    #if whole line is filled/complete whole line erases"""
 
 def Z_update(size = grid_size):
     Z = [[0 for x in range(size)] for x in range(size)]
 
     return Z
+
+def chose_shape():
+    choice = rand.randint(0, 7)
+    if choice == 1:
+        shape = O
+    elif choice == 2:
+        shape = I
+    elif choice == 3:
+        shape = T
+    elif choice == 4:
+        shape = L
+    elif choice == 5:
+        shape = J
+    elif choice == 6:
+        shape = z
+    elif choice == 7:
+        shape = S
+    
+    return shape
+
+def placement(shape):
+    pass
+    #to define whether a piece has been placed
 
 def run(x):
     ax.set_xticks([])
@@ -163,7 +250,7 @@ def run(x):
 
 
 fig, ax = plt.subplots(figsize = (5,5))
-cmap = ListedColormap(["white","yellowgreen","powderblue","lemonchiffon","indianred","thistle","lightpink","orange"])
+cmap = ListedColormap(["white","yellowgreen","powderblue","khaki","indianred","thistle","lightpink","orange"])
 
 fig.canvas.mpl_connect('key_press_event', keypress)
 
