@@ -8,7 +8,7 @@ import random as rand
 """Z coordinate system inverted, when indexing Z array, always done so: Z[y][x]"""
 
 grid_size = 61
-delt_t = 0.5
+delt_t = 0.2
 barrier_s = []
 barrier_g = []
 
@@ -17,6 +17,8 @@ bat_position = [[60,30],[60,28],[60,29],[60,31],[60,32]]
 ball_position = [59,30]
 ball_velocity = [-rand.randint(2,4), rand.randint(2,4)]
 
+speed_change = False
+
 
 def background(size = grid_size):
     global barrier_s, barrier_g
@@ -24,19 +26,18 @@ def background(size = grid_size):
     Z = [[0 for x in range(size)] for x in range(size)]
     for axis in range(size):
         Z[axis][0] = 1
+        Z[0][axis] = 1
+        Z[60][axis] = 1
         barrier_s.append((0,axis))
-    for axis in range(45,size):
-        Z[axis][60] = 1
-        barrier_g.append((60,axis))
-    for axis in range(0,15):
-        Z[axis][60] = 1
-        barrier_g.append((60,axis))
-    
+        
     Z[29][60] = 1
     Z[30][60] = 1
     Z[31][60] = 1
 
     Z[30][59] = 2
+
+    ax.set_xticks([])
+    ax.set_yticks([])
     
     return Z
 
@@ -83,17 +84,13 @@ def ball_update():
     ball_position = [new_x, new_y] #redefined position of ball
 
 def collision_check():
-    global ball_position, ball_velocity, bat_position, loss
+    global ball_position, ball_velocity, bat_position, speed_change, loss
 
     rounded_ball = [round(ball_position[0]), round(ball_position[1])]
+    bat_collision = False
     
     if ball_position[0] <= 0:
         ball_velocity = [-ball_velocity[0], ball_velocity[1]]  
-    elif ball_position[0] >= 60:
-        for point in barrier_g:
-            if ball_position[1] == point[1]:
-                ball_velocity = [-ball_velocity[0], ball_velocity[1]]
-
 
     elif ball_position[1] >= 60:
         ball_velocity = [ball_velocity[0], -ball_velocity[1]]   
@@ -104,26 +101,39 @@ def collision_check():
     for point in bat_position:
         if rounded_ball[0]==point[0] and rounded_ball[1]==point[1]:
             ball_velocity = [-ball_velocity[0], ball_velocity[1]]
+            bat_collision = True
+
+    if bat_collision == True:
+        speed_change = True
+    if bat_collision == False:
+        speed_change = False
+
+def speed():
+    global speed_change, delt_t
+
+    if speed_change == True:
+        delt_t = 0.5
+
+def speed_decay():
+    global delt_t
+
+    if delt_t > 0.2:
+        delt_t -= 0.0025
 
 def loss_check():
-    global ball_position, barrier_g, bat_position
+    global ball_position, barrier_g, bat_position, Z
 
+    rounded_ball = [round(ball_position[0]), round(ball_position[1])]
     loss = True
 
-    for point in barrier_g:
-        if ball_position[1] == point[1]:
-            loss = False
-
     for point in bat_position:
-        if ball_position[1] == point[1]:
+        if rounded_ball[1] == point[1]:
             loss = False
             
         
-    if loss == True and ball_position[0] >= 60:
+    if loss == True and rounded_ball[0] >= 60:
         image.set_data(Z)
         print('You lose! \n Womp. Womp.')
-        print('ball position: ' + str(ball_position))
-        print('bat position: ' + str(bat_position))
         time.sleep(2)
         quit()
 
@@ -133,10 +143,8 @@ def Z_update(size = grid_size):
     Z = [[0 for x in range(size)] for x in range(size)]
     for axis in range(size):
         Z[axis][0] = 1
-    for axis in range(45,size):
-        Z[axis][60] = 1
-    for axis in range(0,15):
-        Z[axis][60] = 1
+        Z[0][axis] = 1
+        Z[60][axis] = 1
     
     for point in bat_position:
         Z[point[1]][point[0]] = 1
@@ -146,15 +154,23 @@ def Z_update(size = grid_size):
     return Z
 
 def run(x):
+    global delt_t
+    
     ball_update()
     collision_check()
+    speed()
     loss_check()
+
+    speed_decay()
         
     ax.set_xticks([])
     ax.set_yticks([])
 
     Z = Z_update()
     image.set_data(Z)
+
+
+
 
 
 fig, ax = plt.subplots(figsize = (5,5))
