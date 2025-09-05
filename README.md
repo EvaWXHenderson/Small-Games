@@ -9,7 +9,7 @@ Get 3 in a row to win! :3
 
 ## Pong
 ### Single-player
-![](https://github.com/EvaWXHenderson/Small-Games/blob/main/images/Single%20player%20pong.gif)
+![](https://github.com/EvaWXHenderson/Small-Games/blob/main/images/Pong-singleT.gif)
 
 A game of single-player pong. A ball hits off of the edges of the window, player has to use the bat to avoid letting the ball through the 'goal'.
 
