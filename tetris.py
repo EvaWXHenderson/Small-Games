@@ -94,6 +94,56 @@ class Shape:
 
 
 
+def change_coords(shape, type, form, centre):
+        if type == "O":
+            shape.centre = centre
+            shape.conformations = [[shape.centre, [shape.centre[0]+1, shape.centre[1]], [shape.centre[0], shape.centre[1]+1], [shape.centre[0]+1, shape.centre[1]+1]]]
+            shape.form = shape.conformations[form]
+        
+        if type == "I":
+            shape.centre = centre
+            shape.conformations =[[shape.centre, [shape.centre[0],shape.centre[1]+1], [shape.centre[0],shape.centre[1]+2], [shape.centre[0],shape.centre[1]+3]],
+                                 [shape.centre, [shape.centre[0]+1,shape.centre[1]], [shape.centre[0]+2,shape.centre[1]], [shape.centre[0]+3,shape.centre[1]]]]
+            shape.form = shape.conformations[form]
+        
+        if type == "T":
+            shape.centre = centre
+            shape.conformations = [[shape.centre, [shape.centre[0]-1, shape.centre[1]], [shape.centre[0]+1, shape.centre[1]], [shape.centre[0], shape.centre[1]+1]],
+                                  [shape.centre,[shape.centre[0], shape.centre[1]+1], [shape.centre[0], shape.centre[1]-1], [shape.centre[0]+1, shape.centre[1]]],
+                                  [shape.centre,[shape.centre[0]-1, shape.centre[1]], [shape.centre[0]+1, shape.centre[1]], [shape.centre[0], shape.centre[1]-1]],
+                                  [shape.centre,[shape.centre[0]-1, shape.centre[1]], [shape.centre[0], shape.centre[1]-1], [shape.centre[0], shape.centre[1]+1]]]
+            shape.form = shape.conformations[form]
+        
+        if type == "L":
+            shape.centre = centre
+            shape.conformations = [[shape.centre, [shape.centre[0]-1, shape.centre[1]], [shape.centre[0]+1, shape.centre[1]], [shape.centre[0]-1, shape.centre[1]+1]],
+                                  [shape.centre, [shape.centre[0], shape.centre[1]-1], [shape.centre[0], shape.centre[1]+1], [shape.centre[0]-1, shape.centre[1]-1]],
+                                  [shape.centre, [shape.centre[0]+1, shape.centre[1]+1], [shape.centre[0], shape.centre[1]+1], [shape.centre[0], shape.centre[1]-1]],
+                                  [shape.centre, [shape.centre[0]-1, shape.centre[1]], [shape.centre[0]+1, shape.centre[1]-1], [shape.centre[0]+1, shape.centre[1]]]]
+            shape.form = shape.conformations[form]
+        
+        if type == "J":
+            shape.centre = centre
+            shape.conformations = [[shape.centre, [shape.centre[0]+1, shape.centre[1]], [shape.centre[0]+1, shape.centre[1]+1], [shape.centre[0]-1, shape.centre[1]]],
+                                  [shape.centre, [shape.centre[0]+1, shape.centre[1]-1], [shape.centre[0], shape.centre[1]+1], [shape.centre[0], shape.centre[1]-1]],
+                                  [shape.centre, [shape.centre[0]-1, shape.centre[1]-1], [shape.centre[0]-1, shape.centre[1]], [shape.centre[0]+1, shape.centre[1]]],
+                                  [shape.centre, [shape.centre[0]-1, shape.centre[1]+1], [shape.centre[0], shape.centre[1]+1], [shape.centre[0], shape.centre[1]-1]]]
+            shape.form = shape.conformations[form]
+       
+        if type == "z":
+            shape.centre = centre
+            shape.conformations = [[shape.centre, [shape.centre[0]-1, shape.centre[1]], [shape.centre[0]+1, shape.centre[1]+1], [shape.centre[0], shape.centre[1]+1]],
+                                  [shape.centre, [shape.centre[0], shape.centre[1]-1], [shape.centre[0]-1, shape.centre[1]], [shape.centre[0]-1, shape.centre[1]+1]]]            
+            shape.form = shape.conformations[form]
+        
+        if type == "S":
+            shape.centre = centre
+            shape.conformations = [[shape.centre, [shape.centre[0]+1, shape.centre[1]], [shape.centre[0]-1, shape.centre[1]+1], [shape.centre[0], shape.centre[1]+1]],
+                                [shape.centre, [shape.centre[0], shape.centre[1]-1], [shape.centre[0]+1, shape.centre[1]], [shape.centre[0]+1, shape.centre[1]+1]]]
+            shape.form = shape.conformations[form]
+
+
+
 """for drawing shapes and assigning colours""" 
 def draw(shape, form, screen):
     points = shape.conformations[form] #a list of points corresponding to desired conformation (form)
@@ -103,7 +153,7 @@ def draw(shape, form, screen):
         screen[coords[1]][coords[0]] = colour
 
 
-
+"""background setting - allow all colours to set"""
 def background(size = grid_size):
     Z = [[0 for x in range(size)] for x in range(size)]
 
@@ -123,6 +173,7 @@ def background(size = grid_size):
     return Z
 
 
+
 """actions"""
 def shape_gen():
     global new_shape, current_shape
@@ -136,7 +187,9 @@ def shape_gen():
 
 def movement(shape, direction):
     if direction == "constant":
-        shape.centre = [shape.centre[0], shape.centre[1]+1]
+        change_coords(current_shape, current_shape.name, 0, [shape.centre[0], shape.centre[1]+1])
+        if shape.centre[1] >= 20: #needs changed to bottom of window or coloured tile
+            placement()
         #shapes move down 1 tile with each frame???
 
     if direction == "left":
@@ -208,10 +261,16 @@ def loss_check():
     pass
 
 
+
 """animation"""
 def Z_update(size = grid_size):
     Z = [[0 for x in range(size)] for x in range(size)]
 
+    for tile in filled_tiles:
+        Z[tile.conformations[0]][tile.conformation[1]] = tile.colour
+
+    for point in current_shape.form:
+        Z[point[1]][point[0]] = current_shape.colour
     return Z
 
 def run(x):
@@ -219,7 +278,7 @@ def run(x):
 
    #actions 
     shape_gen()
-    movement(shape = current_shape[0], direction = "constant")
+    movement(shape = current_shape, direction = "constant")
     
    #checks 
     line_break()
@@ -233,8 +292,7 @@ def run(x):
 
 
 
-
-sshape = Shape(type = 'S', centre=[10,0])
+current_shape = Shape(type = 'S', centre = [10,0])
 
 fig, ax = plt.subplots(figsize = (5,5))
 cmap = ListedColormap(["white","yellowgreen","powderblue","khaki","indianred","thistle","lightpink","orange"])
