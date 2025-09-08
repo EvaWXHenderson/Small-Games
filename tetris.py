@@ -188,50 +188,53 @@ def shape_gen():
         current_shape = Shape(type = choice, centre = [10,1], form = 0) #data for shape stored in current_shape
                                                                         #creates shaped at top border in initial conformation (conformation 0)
 
-def movement(shape, direction):
+def movement(direction, shape = current_shape):
     can_move = True
 
     if direction == "constant":
-        change_coords(shape = current_shape, form = current_shape.form, centre = [shape.centre[0], shape.centre[1]+1])
+        change_coords(shape = current_shape, form = shape.form, centre = [shape.centre[0], shape.centre[1]+1])
         if shape.centre[1] >= 20: #needs changed to bottom of window or coloured tile
             placement()
         #shapes move down 1 tile with each frame???
 
     if direction == "left":
-        for point in shape.form:
+        for point in shape.points:
             if point[0] <= 0:
                 can_move = False
 
         if can_move == True:
-            change_coords(current_shape, current_shape.name, 0, [shape.centre[0]-1, shape.centre[1]])
+            change_coords(shape = current_shape, form = shape.form, centre = [shape.centre[0]-1, shape.centre[1]])
+        
+        set_new_Z()
             
     if direction == "right":
-        for point in shape.form:
+        for point in shape.points:
             if point[0] >= 20:
                 can_move = False
         
         if can_move == True:
-            change_coords(current_shape, current_shape.name, 0, [shape.centre[0]-1, shape.centre[1]])
+            change_coords(shape = current_shape, form = shape.form, centre = [shape.centre[0]+1, shape.centre[1]])
+        
+        set_new_Z()
 
 def rotation(shape = current_shape):
-    #create list of conformations - for every up click, the next conformation is chosen
-    if shape.name == 'L' or shape.name == 'J' or shape.name == 'S' or shape.name == 'z' or shape.name == 'T':
-        counter += 1
-        if counter > 4:
-            counter = 0
-    
-    if shape.name == 'I':
-        counter += 1
-        if counter > 2:
-            counter = 0
-    
-    if shape.name == 'O':
-        counter = 0
-    
-    form = shape.conformation[counter]
-    
-    return form
-    #rotation of shape when up pressed - gets points for the form wanted to then input into the draw function...
+        if current_shape.name == 'T' or current_shape.name == 'L' or current_shape.name == 'J':
+            if current_shape.form <= 3:
+                current_shape.form +=1
+            if current_shape.form > 3:
+                current_shape.form = 0
+        
+        if current_shape.name == 'S' or current_shape.name == 'z' or current_shape.name == 'I':
+            if current_shape.form <= 1:
+                current_shape.form +=1
+            if current_shape.form > 1:
+                current_shape.form = 0
+        
+        if current_shape.name == 'O':
+            current_shape.form = 0
+        
+        change_coords(shape = current_shape, form = current_shape.form, centre = current_shape.centre)
+        set_new_Z()
 
 def placement():
     global current_shape, new_shape
@@ -259,31 +262,14 @@ def keypress(event):
         #speed up placement - change delt_t (independent of frames) or link to framerate???
     
     if event.key == 'up':
-        if current_shape.name == 'T' or current_shape.name == 'L' or current_shape.name == 'J':
-            if current_shape.form <= 3:
-                current_shape.form +=1
-            if current_shape.form > 3:
-                current_shape.form = 0
-        
-        if current_shape.name == 'S' or current_shape.name == 'z' or current_shape.name == 'I':
-            if current_shape.form <= 1:
-                current_shape.form +=1
-            if current_shape.form > 1:
-                current_shape.form = 0
-        
-        if current_shape.name == 'O':
-            current_shape.form = 0
-        
-        change_coords(shape = current_shape, form = current_shape.form, centre = current_shape.centre)
-        set_new_Z()
+        rotation()
     
     if event.key == 'left':
         print("left")
-        #movement(shape = current_shape, direction = "left")
+        movement(shape = current_shape, direction = "left")
     if event.key == 'right':
         print("right")
-        #movement(shape = current_shape, direction = "right")
-    #need to define the shape in current use
+        movement(shape = current_shape, direction = "right")
 
 
 
