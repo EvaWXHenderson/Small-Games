@@ -38,11 +38,19 @@ Ball speeds up upon being hit by a players bat, speed slows down as it moves.
 Simple game of classic tetris with the pieces:
 
 <p align="center">
-  <img src="https://github.com/EvaWXHenderson/Small-Games/blob/main/images/Screenshot%202025-09-05%20at%2015.32.05.png" width="100" />
-  <img src="https://github.com/EvaWXHenderson/Small-Games/blob/main/images/Screenshot%202025-09-05%20at%2015.31.46.png" width="100" />
-  <img src="https://github.com/EvaWXHenderson/Small-Games/blob/main/images/Screenshot%202025-09-05%20at%2015.31.32.png" width="100" />
-  <img src="https://github.com/EvaWXHenderson/Small-Games/blob/main/images/Screenshot%202025-09-05%20at%2015.31.20.png" width="100" />
-  <img src="https://github.com/EvaWXHenderson/Small-Games/blob/main/images/Screenshot%202025-09-05%20at%2015.31.09.png" width="100" /> 
-  <img src="https://github.com/EvaWXHenderson/Small-Games/blob/main/images/Screenshot%202025-09-05%20at%2015.30.53.png" width="100" />
-  <img src="https://github.com/EvaWXHenderson/Small-Games/blob/main/images/Screenshot%202025-09-05%20at%2015.36.52.png" width="100" /> 
+  <img src="https://github.com/EvaWXHenderson/Small-Games/blob/main/images/Screenshot%202025-09-05%20at%2015.32.05.png" width="95" />
+  <img src="https://github.com/EvaWXHenderson/Small-Games/blob/main/images/Screenshot%202025-09-05%20at%2015.31.46.png" width="95" />
+  <img src="https://github.com/EvaWXHenderson/Small-Games/blob/main/images/Screenshot%202025-09-05%20at%2015.31.32.png" width="95" />
+  <img src="https://github.com/EvaWXHenderson/Small-Games/blob/main/images/Screenshot%202025-09-05%20at%2015.31.20.png" width="95" />
+  <img src="https://github.com/EvaWXHenderson/Small-Games/blob/main/images/Screenshot%202025-09-05%20at%2015.31.09.png" width="95" /> 
+  <img src="https://github.com/EvaWXHenderson/Small-Games/blob/main/images/Screenshot%202025-09-05%20at%2015.30.53.png" width="95" />
+  <img src="https://github.com/EvaWXHenderson/Small-Games/blob/main/images/Screenshot%202025-09-05%20at%2015.36.52.png" width="95" /> 
 </p>
+
+|Keys      |           |
+| ---      | ---       |
+|Rotate    |up arrow   |
+|Left      |left  arrow|
+|Right     |right arrow|
+|Speed down|down arrow |
+|Place     |enter      |
