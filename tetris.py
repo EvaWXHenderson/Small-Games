@@ -8,7 +8,10 @@ import time
 grid_size = 21
 delt_t = 0.3
 
-frame_rate = 100
+frame_rate = 200
+
+loss = False
+choices = ['O', 'I', 'T', 'S', 'L', 'J', 'z']
 
 filled_tiles = []
 current_shape = ""
@@ -32,7 +35,8 @@ class Shape:
         if type == 'I':
             self.name = 'I'
             self.centre = centre
-            self.conformations =[[self.centre, [self.centre[0],self.centre[1]+1], [self.centre[0],self.centre[1]+2], [self.centre[0],self.centre[1]+3]]]
+            self.conformations =[[self.centre, [self.centre[0],self.centre[1]+1], [self.centre[0],self.centre[1]+2], [self.centre[0],self.centre[1]+3]],
+                                 [self.centre, [self.centre[0]+1,self.centre[1]], [self.centre[0]+2,self.centre[1]], [self.centre[0]+3,self.centre[1]]]]
             self.colour = 2
 
             self.form = 0
@@ -50,7 +54,10 @@ class Shape:
         if type == 'L':
             self.name = 'L'
             self.centre = centre
-            self.conformations = [[self.centre, [self.centre[0]-1, self.centre[1]], [self.centre[0]+1, self.centre[1]], [self.centre[0]-1, self.centre[1]+1]]]
+            self.conformations = [[self.centre, [self.centre[0]-1, self.centre[1]], [self.centre[0]-2, self.centre[1]], [self.centre[0], self.centre[1]-1]],
+                                  [self.centre, [self.centre[0]+1, self.centre[1]], [self.centre[0], self.centre[1]-1], [self.centre[0], self.centre[1]-2]],
+                                  [self.centre, [self.centre[0]+1, self.centre[1]], [self.centre[0]+2, self.centre[1]], [self.centre[0], self.centre[1]+1]],
+                                  [self.centre, [self.centre[0], self.centre[1]+1], [self.centre[0], self.centre[1]+2], [self.centre[0]-1, self.centre[1]]]]
             self.colour = 4
 
             self.form = 0
@@ -59,7 +66,10 @@ class Shape:
         if type == 'J':
             self.name = 'J'
             self.centre = centre
-            self.conformations = [[self.centre, [self.centre[0]+1, self.centre[1]], [self.centre[0]+1, self.centre[1]+1], [self.centre[0]-1, self.centre[1]]]]
+            self.conformations = [[self.centre, [self.centre[0]-1, self.centre[1]], [self.centre[0]-2, self.centre[1]], [self.centre[0], self.centre[1]+1]],
+                                   [self.centre, [self.centre[0]-1, self.centre[1]], [self.centre[0], self.centre[1]-1], [self.centre[0], self.centre[1]-2]],
+                                   [self.centre, [self.centre[0]+1, self.centre[1]], [self.centre[0]+2, self.centre[1]], [self.centre[0], self.centre[1]-1]],
+                                   [self.centre, [self.centre[0], self.centre[1]+1], [self.centre[0]-1, self.centre[1]], [self.centre[0]-2, self.centre[1]]]]
             self.colour = 5
 
             self.form = 0
@@ -68,7 +78,8 @@ class Shape:
         if type == 'z':
             self.name = 'z'
             self.centre = centre
-            self.conformations = [[self.centre, [self.centre[0]-1, self.centre[1]], [self.centre[0]+1, self.centre[1]+1], [self.centre[0], self.centre[1]+1]]]
+            self.conformations = [[self.centre, [self.centre[0]-1, self.centre[1]], [self.centre[0]+1, self.centre[1]+1], [self.centre[0], self.centre[1]+1]],
+                                  [self.centre, [self.centre[0], self.centre[1]-1], [self.centre[0]-1, self.centre[1]], [self.centre[0]-1, self.centre[1]+1]]]   
             self.colour = 6
 
             self.form = 0
@@ -77,7 +88,8 @@ class Shape:
         if type == 'S':
             self.name = 'S'
             self.centre = centre
-            self.conformations = [[self.centre, [self.centre[0]+1, self.centre[1]], [self.centre[0]-1, self.centre[1]+1], [self.centre[0], self.centre[1]+1]]]
+            self.conformations = [[self.centre, [self.centre[0]+1, self.centre[1]], [self.centre[0]-1, self.centre[1]+1], [self.centre[0], self.centre[1]+1]],
+                                [self.centre, [self.centre[0], self.centre[1]-1], [self.centre[0]+1, self.centre[1]], [self.centre[0]+1, self.centre[1]+1]]]
             self.colour = 7
 
             self.form = 0
@@ -91,7 +103,7 @@ def change_coords(form, centre, shape = current_shape):
             shape.conformations = [[shape.centre, [shape.centre[0]+1, shape.centre[1]], [shape.centre[0], shape.centre[1]+1], [shape.centre[0]+1, shape.centre[1]+1]]]
             
             shape.form = form
-            shape.points = shape.conformations[form]
+            shape.points = shape.conformations[shape.form]
                   
         if shape.name == "I":
             shape.centre = centre
@@ -99,36 +111,36 @@ def change_coords(form, centre, shape = current_shape):
                                  [shape.centre, [shape.centre[0]+1,shape.centre[1]], [shape.centre[0]+2,shape.centre[1]], [shape.centre[0]+3,shape.centre[1]]]]
 
             shape.form = form
-            shape.points = shape.conformations[form]
+            shape.points = shape.conformations[shape.form]
         
         if shape.name == "T":
             shape.centre = centre
-            shape.conformations = [[shape.centre, [shape.centre[0]-1, shape.centre[1]], [shape.centre[0]+1, shape.centre[1]], [shape.centre[0], shape.centre[1]+1]],
-                                  [shape.centre,[shape.centre[0], shape.centre[1]+1], [shape.centre[0], shape.centre[1]-1], [shape.centre[0]+1, shape.centre[1]]],
-                                  [shape.centre,[shape.centre[0]-1, shape.centre[1]], [shape.centre[0]+1, shape.centre[1]], [shape.centre[0], shape.centre[1]-1]],
-                                  [shape.centre,[shape.centre[0]-1, shape.centre[1]], [shape.centre[0], shape.centre[1]-1], [shape.centre[0], shape.centre[1]+1]]]
+            shape.conformations = [[shape.centre,[shape.centre[0]-1, shape.centre[1]], [shape.centre[0]+1, shape.centre[1]], [shape.centre[0], shape.centre[1]+1]],
+                                   [shape.centre,[shape.centre[0], shape.centre[1]+1], [shape.centre[0], shape.centre[1]-1], [shape.centre[0]-1, shape.centre[1]]],
+                                   [shape.centre, [shape.centre[0]-1, shape.centre[1]], [shape.centre[0]+1, shape.centre[1]], [shape.centre[0], shape.centre[1]-1]],
+                                   [shape.centre,[shape.centre[0], shape.centre[1]+1], [shape.centre[0], shape.centre[1]-1], [shape.centre[0]+1, shape.centre[1]]]]
             shape.form = form
-            shape.points = shape.conformations[form]
+            shape.points = shape.conformations[shape.form]
         
         if shape.name == "L":
             shape.centre = centre
-            shape.conformations = [[shape.centre, [shape.centre[0]-1, shape.centre[1]], [shape.centre[0]+1, shape.centre[1]], [shape.centre[0]-1, shape.centre[1]+1]],
-                                  [shape.centre, [shape.centre[0], shape.centre[1]-1], [shape.centre[0], shape.centre[1]+1], [shape.centre[0]-1, shape.centre[1]-1]],
-                                  [shape.centre, [shape.centre[0]+1, shape.centre[1]+1], [shape.centre[0], shape.centre[1]+1], [shape.centre[0], shape.centre[1]-1]],
-                                  [shape.centre, [shape.centre[0]-1, shape.centre[1]], [shape.centre[0]+1, shape.centre[1]-1], [shape.centre[0]+1, shape.centre[1]]]]
+            shape.conformations = [[shape.centre, [shape.centre[0]-1, shape.centre[1]], [shape.centre[0]-2, shape.centre[1]], [shape.centre[0], shape.centre[1]-1]],
+                                  [shape.centre, [shape.centre[0]+1, shape.centre[1]], [shape.centre[0], shape.centre[1]-1], [shape.centre[0], shape.centre[1]-2]],
+                                  [shape.centre, [shape.centre[0]+1, shape.centre[1]], [shape.centre[0]+2, shape.centre[1]], [shape.centre[0], shape.centre[1]+1]],
+                                  [shape.centre, [shape.centre[0], shape.centre[1]+1], [shape.centre[0], shape.centre[1]+2], [shape.centre[0]-1, shape.centre[1]]]]
 
             shape.form = form
-            shape.points = shape.conformations[form]
+            shape.points = shape.conformations[shape.form]
         
         if shape.name == "J":
             shape.centre = centre
-            shape.conformations = [[shape.centre, [shape.centre[0]+1, shape.centre[1]], [shape.centre[0]+1, shape.centre[1]+1], [shape.centre[0]-1, shape.centre[1]]],
-                                  [shape.centre, [shape.centre[0]+1, shape.centre[1]-1], [shape.centre[0], shape.centre[1]+1], [shape.centre[0], shape.centre[1]-1]],
-                                  [shape.centre, [shape.centre[0]-1, shape.centre[1]-1], [shape.centre[0]-1, shape.centre[1]], [shape.centre[0]+1, shape.centre[1]]],
-                                  [shape.centre, [shape.centre[0]-1, shape.centre[1]+1], [shape.centre[0], shape.centre[1]+1], [shape.centre[0], shape.centre[1]-1]]]
+            shape.conformations = [[shape.centre, [shape.centre[0]-1, shape.centre[1]], [shape.centre[0]-2, shape.centre[1]], [shape.centre[0], shape.centre[1]+1]],
+                                   [shape.centre, [shape.centre[0]-1, shape.centre[1]], [shape.centre[0], shape.centre[1]-1], [shape.centre[0], shape.centre[1]-2]],
+                                   [shape.centre, [shape.centre[0]+1, shape.centre[1]], [shape.centre[0]+2, shape.centre[1]], [shape.centre[0], shape.centre[1]-1]],
+                                   [shape.centre, [shape.centre[0], shape.centre[1]+1], [shape.centre[0]-1, shape.centre[1]], [shape.centre[0]-2, shape.centre[1]]]]
 
             shape.form = form
-            shape.points = shape.conformations[form]
+            shape.points = shape.conformations[shape.form]
        
         if shape.name == "z":
             shape.centre = centre
@@ -136,7 +148,7 @@ def change_coords(form, centre, shape = current_shape):
                                   [shape.centre, [shape.centre[0], shape.centre[1]-1], [shape.centre[0]-1, shape.centre[1]], [shape.centre[0]-1, shape.centre[1]+1]]]            
 
             shape.form = form
-            shape.points = shape.conformations[form]
+            shape.points = shape.conformations[shape.form]
         
         if shape.name == "S":
             shape.centre = centre
@@ -144,7 +156,7 @@ def change_coords(form, centre, shape = current_shape):
                                 [shape.centre, [shape.centre[0], shape.centre[1]-1], [shape.centre[0]+1, shape.centre[1]], [shape.centre[0]+1, shape.centre[1]+1]]]
 
             shape.form = form
-            shape.points = shape.conformations[form]
+            shape.points = shape.conformations[shape.form]
 
 
 
@@ -190,16 +202,17 @@ def movement(direction, shape = current_shape):
 
         for point in current_shape.points:
             if point[1] >= 20: #hits bottom of window
-                print(point)
+                print(current_shape.points)
                 current_shape = redefine()
                 break
         
         for point in current_shape.points:
             for tiles in filled_tiles:
-                for coords in tiles.points:
-                    if point[1] + 1 == coords[1]:
+                for coord in tiles.points:
+                    if point[1] + 1 == coord[1] and point[0] == coord[0]:
                         print(point)
                         current_shape = redefine()
+                        set_new_Z()
                         break
 
     if direction == "left":
@@ -229,29 +242,36 @@ def movement(direction, shape = current_shape):
 def rotation(shape = current_shape):
         if current_shape.name == 'T' or current_shape.name == 'L' or current_shape.name == 'J':
             if current_shape.form <= 3:
-                current_shape.form +=1
+                new_form = current_shape.form + 1
             if current_shape.form > 3:
-                current_shape.form = 0
+                new_form = 0
         
-        if current_shape.name == 'S' or current_shape.name == 'z' or current_shape.name == 'I':
+        elif current_shape.name == 'S' or current_shape.name == 'z' or current_shape.name == 'I':
             if current_shape.form <= 1:
-                current_shape.form +=1
+                new_form = current_shape.form + 1
             if current_shape.form > 1:
-                current_shape.form = 0
+                new_form = 0
         
-        if current_shape.name == 'O':
-            current_shape.form = 0
+        elif current_shape.name == 'O':
+            new_form = 0
+
+        print(str(current_shape.name) + " " + str(current_shape.form))
+
+        #for point in current_shape.points:
+            #if point[1] >= 20:
+                #print("shape rotation bring points below window")
+                #current_shape.centre[1] = 20
         
-        change_coords(shape = current_shape, form = current_shape.form, centre = current_shape.centre)
+        change_coords(shape = current_shape, form = new_form, centre = current_shape.centre)
         set_new_Z()
 
 def redefine(shape = current_shape):
-    global filled_tiles, current_shape
+    global filled_tiles, current_shape, choices
 
     past_shape = Shape(type = current_shape.name, centre = current_shape.centre, form = current_shape.form)
+    
     filled_tiles.append(past_shape)
-
-    choices = ['O', 'I', 'T', 'S', 'L', 'J', 'z']
+    
     choice = rand.choice(choices)
     
     new_shape = Shape(type = choice, centre = [10,0], form = 0) #data for shape stored in current_shape
@@ -259,7 +279,28 @@ def redefine(shape = current_shape):
     return new_shape
  
 def placement():
-    pass
+    global filled_tiles
+
+    x_current = []
+    y_current = []
+
+    x_filled = []
+    y_filled = []
+    
+    for point in current_shape.points:
+        x_current.append(point[0])
+        y_current.append(point[1])
+
+    for tile in filled_tiles:
+        for coord in tile.points:
+            x_filled.append(coord[0])
+            y_filled.append(coord[1])
+    
+    y_min = min(y_filled)
+
+
+
+
 
 def speed_place(x = frame_rate):
     x = 100
@@ -294,8 +335,8 @@ def line_break():
     #if whole line is filled/complete whole line erases
 
 def loss_check():
-    loss = False
-
+    global loss
+    
     for point in current_shape.points:
         if point[1] <= 0:
             print(point)
@@ -336,11 +377,11 @@ def run(x):
     Z = Z_update()
     image.set_data(Z)
 
-    loss_check()
+    #loss_check()
 
 
 
-current_shape = Shape(type = 'L', centre = [10,0], form = 0)
+current_shape = Shape(type = rand.choice(choices), centre = [10,0], form = 0)
 
 fig, ax = plt.subplots(figsize = (5,5))
 cmap = ListedColormap(["white","yellowgreen","powderblue","khaki","indianred","thistle","lightpink","orange"])
@@ -352,7 +393,9 @@ image = ax.imshow(background(), origin = 'upper', cmap=cmap)
 ani = FuncAnimation(fig, run, frames = 100, interval = frame_rate, blit = False)
 plt.show()
 
-print("number of generated shapes: " + str(len(filled_tiles)+1))
+"""print("number of generated shapes: " + str(len(filled_tiles)+1))
 for shape in filled_tiles:
     print("tiles on screen: " + str(shape.name) + ". Coords: " + str(shape.centre))
 print("current shape: " + str(current_shape.name) + ". Coods: " + str(current_shape.centre))
+
+print(str(current_shape.name) + str(current_shape.form))"""
