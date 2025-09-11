@@ -3,16 +3,17 @@ from matplotlib.colors import ListedColormap
 from matplotlib.animation import FuncAnimation
 
 import random as rand
+import time
 
 grid_size = 21
 delt_t = 0.3
 
-frame_rate = 1000
+frame_rate = 100
 
 filled_tiles = []
-screen_shapes = []
 current_shape = ""
 
+screen_shapes = []
 shape_form = ""
 
 
@@ -178,24 +179,28 @@ def background(size = grid_size):
 
 
 """actions"""
-def shape_gen():
-    global new_shape, current_shape
-
-    choices = ['O', 'I', 'T', 'S', 'L', 'J', 'z']
-    choice = rand.choice(choices)
-    
-    if new_shape == True:
-        current_shape = Shape(type = choice, centre = [10,1], form = 0) #data for shape stored in current_shape
-                                                                        #creates shaped at top border in initial conformation (conformation 0)
-
 def movement(direction, shape = current_shape):
+    global current_shape
+
     can_move = True
+    #placed = False
 
     if direction == "constant":
         change_coords(shape = current_shape, form = shape.form, centre = [shape.centre[0], shape.centre[1]+1])
-        if shape.centre[1] >= 20: #needs changed to bottom of window or coloured tile
-            placement()
-        #shapes move down 1 tile with each frame???
+
+        for point in current_shape.points:
+            if point[1] >= 20: #hits bottom of window
+                print(point)
+                current_shape = redefine()
+                break
+        
+        for point in current_shape.points:
+            for tiles in filled_tiles:
+                for coords in tiles.points:
+                    if point[1] + 1 == coords[1]:
+                        print(point)
+                        current_shape = redefine()
+                        break
 
     if direction == "left":
         for point in shape.points:
@@ -204,16 +209,20 @@ def movement(direction, shape = current_shape):
 
         if can_move == True:
             change_coords(shape = current_shape, form = shape.form, centre = [shape.centre[0]-1, shape.centre[1]])
+        elif can_move == False:
+            pass
         
         set_new_Z()
             
     if direction == "right":
         for point in shape.points:
-            if point[0] >= 20:
+            if point[0] >= 21:
                 can_move = False
         
         if can_move == True:
             change_coords(shape = current_shape, form = shape.form, centre = [shape.centre[0]+1, shape.centre[1]])
+        elif can_move == False:
+            pass
         
         set_new_Z()
 
@@ -236,30 +245,36 @@ def rotation(shape = current_shape):
         change_coords(shape = current_shape, form = current_shape.form, centre = current_shape.centre)
         set_new_Z()
 
+def redefine(shape = current_shape):
+    global filled_tiles, current_shape
+
+    past_shape = Shape(type = current_shape.name, centre = current_shape.centre, form = current_shape.form)
+    filled_tiles.append(past_shape)
+
+    choices = ['O', 'I', 'T', 'S', 'L', 'J', 'z']
+    choice = rand.choice(choices)
+    
+    new_shape = Shape(type = choice, centre = [10,0], form = 0) #data for shape stored in current_shape
+                                                                    #creates shaped at top border in initial conformation (conformation 0)
+    return new_shape
+ 
 def placement():
-    global current_shape, new_shape
-
-    filled_tiles.append(current_shape)
-
-    current_shape = ""
-    new_shape = True
-    #to define whether a piece has been placed - should put shape at the highest unoccupied value of Y
-    #clears list containing the current shape and indicated for next shape to generated and added
+    pass
 
 def speed_place(x = frame_rate):
     x = 100
 
 def keypress(event):
-    global shape_form
+    global frame_rate
 
     if event.key == '<space>':
         print("space")
         #placement()
         #instant placement
     if event.key == 'down':
-        print("down")
+        #print("down")
+        frame_rate = 100
         #speed_place()
-        #speed up placement - change delt_t (independent of frames) or link to framerate???
     
     if event.key == 'up':
         rotation()
@@ -279,7 +294,18 @@ def line_break():
     #if whole line is filled/complete whole line erases
 
 def loss_check():
-    pass
+    loss = False
+
+    for point in current_shape.points:
+        if point[1] <= 0:
+            print(point)
+            loss = True
+            break
+    
+    if loss == True:
+        print('you loose, womp womp.')
+        time.sleep(2)
+        quit()
 
 
 
@@ -290,24 +316,19 @@ def set_new_Z():
 
 def Z_update(size = grid_size):
     Z = [[0 for x in range(size)] for x in range(size)]
-
-    for tile in filled_tiles:
-        Z[tile.conformations[0]][tile.conformation[1]] = tile.colour
+    
+    for shape in filled_tiles:
+        for points in shape.points:
+            Z[points[1]][points[0]] = shape.colour
 
     for point in current_shape.points:
         Z[point[1]][point[0]] = current_shape.colour
     return Z
 
 def run(x):
-    new_shape = False
 
-   #actions 
-    #shape_gen()
+   #actions
     movement(shape = current_shape, direction = "constant")
-    
-   #checks 
-    #line_break()
-    #loss_check()
 
     ax.set_xticks([])
     ax.set_yticks([])
@@ -315,9 +336,11 @@ def run(x):
     Z = Z_update()
     image.set_data(Z)
 
+    loss_check()
 
 
-current_shape = Shape(type = 'S', centre = [10,0], form = 0)
+
+current_shape = Shape(type = 'L', centre = [10,0], form = 0)
 
 fig, ax = plt.subplots(figsize = (5,5))
 cmap = ListedColormap(["white","yellowgreen","powderblue","khaki","indianred","thistle","lightpink","orange"])
@@ -328,3 +351,8 @@ image = ax.imshow(background(), origin = 'upper', cmap=cmap)
 
 ani = FuncAnimation(fig, run, frames = 100, interval = frame_rate, blit = False)
 plt.show()
+
+print("number of generated shapes: " + str(len(filled_tiles)+1))
+for shape in filled_tiles:
+    print("tiles on screen: " + str(shape.name) + ". Coords: " + str(shape.centre))
+print("current shape: " + str(current_shape.name) + ". Coods: " + str(current_shape.centre))
