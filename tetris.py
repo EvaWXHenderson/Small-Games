@@ -45,7 +45,10 @@ class Shape:
         if type == 'T':
             self.name = 'T'
             self.centre = centre
-            self.conformations = [[self.centre, [self.centre[0]-1, self.centre[1]], [self.centre[0]+1, self.centre[1]], [self.centre[0], self.centre[1]+1]]]
+            self.conformations = [[self.centre,[self.centre[0]-1, self.centre[1]], [self.centre[0]+1, self.centre[1]], [self.centre[0], self.centre[1]+1]],
+                                   [self.centre,[self.centre[0], self.centre[1]+1], [self.centre[0], self.centre[1]-1], [self.centre[0]-1, self.centre[1]]],
+                                   [self.centre, [self.centre[0]-1, self.centre[1]], [self.centre[0]+1, self.centre[1]], [self.centre[0], self.centre[1]-1]],
+                                   [self.centre,[self.centre[0], self.centre[1]+1], [self.centre[0], self.centre[1]-1], [self.centre[0]+1, self.centre[1]]]]
             self.colour = 3
 
             self.form = 0
@@ -214,11 +217,18 @@ def movement(direction, shape = current_shape):
                         current_shape = redefine()
                         set_new_Z()
                         break
+                    #checks points in the current shape, checks if the tile below it (one greater on y and same on x) is filled - if so - shape is redefined and shape is added to filled tiles list
 
     if direction == "left":
         for point in shape.points:
             if point[0] <= 0:
                 can_move = False
+
+        for point in shape.points:
+            for x in filled_tiles:
+                for coord in x.points:
+                    if point[0] - 1 == coord[0] and point[1]== coord[1]:
+                        can_move = False
 
         if can_move == True:
             change_coords(shape = current_shape, form = shape.form, centre = [shape.centre[0]-1, shape.centre[1]])
@@ -231,6 +241,12 @@ def movement(direction, shape = current_shape):
         for point in shape.points:
             if point[0] >= 21:
                 can_move = False
+
+        for point in shape.points:
+            for x in filled_tiles:
+                for coord in x.points:
+                    if point[0] + 1 == coord[0] and point[1] == coord[1]:
+                        can_move = False
         
         if can_move == True:
             change_coords(shape = current_shape, form = shape.form, centre = [shape.centre[0]+1, shape.centre[1]])
@@ -242,18 +258,18 @@ def movement(direction, shape = current_shape):
 def rotation(shape = current_shape):
         if current_shape.name == 'T' or current_shape.name == 'L' or current_shape.name == 'J':
             if current_shape.form <= 3:
-                new_form = current_shape.form + 1
+                current_shape.form += 1
             if current_shape.form > 3:
-                new_form = 0
+                current_shape.form  = 0
         
         elif current_shape.name == 'S' or current_shape.name == 'z' or current_shape.name == 'I':
             if current_shape.form <= 1:
-                new_form = current_shape.form + 1
+                current_shape.form += 1
             if current_shape.form > 1:
-                new_form = 0
+                current_shape.form  = 0
         
         elif current_shape.name == 'O':
-            new_form = 0
+            current_shape.form = 0
 
         print(str(current_shape.name) + " " + str(current_shape.form))
 
@@ -262,7 +278,7 @@ def rotation(shape = current_shape):
                 #print("shape rotation bring points below window")
                 #current_shape.centre[1] = 20
         
-        change_coords(shape = current_shape, form = new_form, centre = current_shape.centre)
+        change_coords(shape = current_shape, form = current_shape.form, centre = current_shape.centre)
         set_new_Z()
 
 def redefine(shape = current_shape):
@@ -313,18 +329,15 @@ def keypress(event):
         #placement()
         #instant placement
     if event.key == 'down':
-        #print("down")
-        frame_rate = 100
+        pass
+        #frame_rate = 100
         #speed_place()
     
     if event.key == 'up':
         rotation()
-    
     if event.key == 'left':
-        print("left")
         movement(shape = current_shape, direction = "left")
     if event.key == 'right':
-        print("right")
         movement(shape = current_shape, direction = "right")
 
 
