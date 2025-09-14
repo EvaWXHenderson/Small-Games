@@ -195,7 +195,7 @@ def background(size = grid_size):
 
 """actions"""
 def movement(direction, shape = current_shape):
-    global current_shape
+    global current_shape, can_move
 
     can_move = True
     hit_b = False
@@ -210,15 +210,8 @@ def movement(direction, shape = current_shape):
                     #checks points in the current shape, checks if the tile below it (one greater on y and same on x) is filled - if so - shape is redefined and shape is added to filled tiles list
 
     if direction == "left":
-        for point in shape.points:
-            if point[0] <= 0:
-                can_move = False
 
-        for point in shape.points:
-            for x in filled_tiles:
-                for coord in x.points:
-                    if point[0] - 1 == coord[0] and point[1]== coord[1]:
-                        can_move = False
+        check_move('left')
 
         if can_move == True:
             change_coords(shape = current_shape, form = shape.form, centre = [shape.centre[0]-1, shape.centre[1]])
@@ -228,15 +221,8 @@ def movement(direction, shape = current_shape):
         set_new_Z()
             
     if direction == "right":
-        for point in shape.points:
-            if point[0] >= 21:
-                can_move = False
 
-        for point in shape.points:
-            for x in filled_tiles:
-                for coord in x.points:
-                    if point[0] + 1 == coord[0] and point[1] == coord[1]:
-                        can_move = False
+        check_move('right')
         
         if can_move == True:
             change_coords(shape = current_shape, form = shape.form, centre = [shape.centre[0]+1, shape.centre[1]])
@@ -311,7 +297,7 @@ def hit_bottom():
 
     for point in current_shape.points:
         if point[1] >= 20: #hits bottom of window
-            print(current_shape.points)
+            #print(current_shape.points)
             current_shape = redefine()
             print('shape change - hit bottom of window')
             hit_b = True
@@ -319,7 +305,7 @@ def hit_bottom():
 
 def hit_shape():
     global current_shape, filled_tiles
-    
+
     for point in current_shape.points:
         for shapes in filled_tiles:
             for tile in shapes.points:
@@ -328,14 +314,38 @@ def hit_shape():
                     print('shape change - hit other shape')
                     return
     
+def check_move(direction):
+    global current_shape, can_move, filled_tiles
 
+    if direction == 'left':
+        for point in current_shape.points:
+            if point[0] <= 0:
+                print('shape at left boundary, cannot continue')
+                can_move = False
 
+        for point in current_shape.points:
+            for shapes in filled_tiles:
+                for coord in shapes.points:
+                    if point[0] - 1 == coord[0] and point[1]== coord[1]:
+                        can_move = False
+
+    if direction == 'right':
+        for point in current_shape.points:
+            if point[0] >= 20:
+                print('shape at right boundary, cannot continue')
+                can_move = False
+
+        for point in current_shape.points:
+            for shapes in filled_tiles:
+                for coord in shapes.points:
+                    if point[0] + 1 == coord[0] and point[1] == coord[1]:
+                        can_move = False
 
 def speed_place(x = frame_rate):
     x = 100
 
 def keypress(event):
-    global frame_rate
+    global frame_rate, can_move, current_shape
 
     if event.key == '<space>':
         print("space")
@@ -348,10 +358,23 @@ def keypress(event):
     
     if event.key == 'up':
         rotation()
+    
     if event.key == 'left':
+        check_move('left')
         movement(shape = current_shape, direction = "left")
+        if can_move == True:
+            movement(shape = current_shape, direction = "left")
+        else:
+            pass
+        print(current_shape.points)
+   
     if event.key == 'right':
-        movement(shape = current_shape, direction = "right")
+        check_move('right')
+        if can_move == True:
+            movement(shape = current_shape, direction = "right")
+        else:
+            pass
+        print(current_shape.points)
 
 
 
@@ -406,6 +429,7 @@ def Z_update(size = grid_size):
             Z[points[1]][points[0]] = shape.colour
 
     for point in current_shape.points:
+        print([point[1], point[0]])
         Z[point[1]][point[0]] = current_shape.colour
     return Z
 
@@ -415,7 +439,7 @@ def run(x):
     movement(shape = current_shape, direction = "constant")
     check_error("above window")
     check_error("below window")
-    print(str(current_shape.name) + str(current_shape.form) + str(current_shape.points))
+    #print(str(current_shape.name) + str(current_shape.form) + str(current_shape.points))
 
     ax.set_xticks([])
     ax.set_yticks([])
