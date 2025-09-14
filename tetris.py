@@ -198,25 +198,15 @@ def movement(direction, shape = current_shape):
     global current_shape
 
     can_move = True
-    #placed = False
+    hit_b = False
 
     if direction == "constant":
         change_coords(shape = current_shape, form = shape.form, centre = [shape.centre[0], shape.centre[1]+1])
 
-        for point in current_shape.points:
-            if point[1] >= 20: #hits bottom of window
-                print(current_shape.points)
-                current_shape = redefine()
-                break
+        hit_bottom()
         
-        for point in current_shape.points:
-            for tiles in filled_tiles:
-                for coord in tiles.points:
-                    if point[1] + 1 == coord[1] and point[0] == coord[0]:
-                        print(point)
-                        current_shape = redefine()
-                        set_new_Z()
-                        break
+        if hit_b == False:
+            hit_shape()
                     #checks points in the current shape, checks if the tile below it (one greater on y and same on x) is filled - if so - shape is redefined and shape is added to filled tiles list
 
     if direction == "left":
@@ -316,6 +306,29 @@ def placement():
 
 
 
+def hit_bottom():
+    global hit_b, current_shape
+
+    for point in current_shape.points:
+        if point[1] >= 20: #hits bottom of window
+            print(current_shape.points)
+            current_shape = redefine()
+            print('shape change - hit bottom of window')
+            hit_b = True
+            return
+
+def hit_shape():
+    global current_shape, filled_tiles
+    
+    for point in current_shape.points:
+        for shapes in filled_tiles:
+            for tile in shapes.points:
+                if point[1] + 1 == tile[1] and point[0] == tile[0]:
+                    current_shape = redefine()
+                    print('shape change - hit other shape')
+                    return
+    
+
 
 
 def speed_place(x = frame_rate):
@@ -361,6 +374,23 @@ def loss_check():
         time.sleep(2)
         quit()
 
+def check_error(error):
+    global current_shape
+
+    if error == "above window":
+        for point in current_shape.points:
+            if point[1] < 0:
+                print('shape above window threshold')
+                print(current_shape.points)
+                print(point)
+                #quit()
+    
+    if error == "below window":
+        for point in current_shape.points:
+            if point[1] > 20:
+                print('shape below window threshold')
+                print(point)
+                #quit()
 
 
 """animation"""
@@ -383,6 +413,9 @@ def run(x):
 
    #actions
     movement(shape = current_shape, direction = "constant")
+    check_error("above window")
+    check_error("below window")
+    print(str(current_shape.name) + str(current_shape.form) + str(current_shape.points))
 
     ax.set_xticks([])
     ax.set_yticks([])
