@@ -267,24 +267,25 @@ def redefine(shape = current_shape):
     return new_shape
  
 def placement():
-    global filled_tiles
-
-    x_current = []
-    y_current = []
-
-    x_filled = []
-    y_filled = []
+    global filled_tiles, current_shape
     
-    for point in current_shape.points:
-        x_current.append(point[0])
-        y_current.append(point[1])
+    can_place = True
+    spaces = 0
 
-    for tile in filled_tiles:
-        for coord in tile.points:
-            x_filled.append(coord[0])
-            y_filled.append(coord[1])
+    while can_place == True:
+        change_coords(shape = current_shape, form = current_shape.form, centre = [current_shape.centre[0], current_shape.centre[1]+1])
+        
+        for point in current_shape.points:
+            for tiles in filled_tiles:
+                for coord in tiles.points:
+                    if point[1] + 2 == coord[1] and point[0] == coord[0]:
+                        can_place = False
+        
+        for point in current_shape.points:
+            if point[1] >= 19:
+                can_place = False
     
-    y_min = min(y_filled)
+    set_new_Z()
 
 
 
@@ -339,7 +340,7 @@ def check_move(direction):
 
     if direction == "down":
         for point in current_shape.points:
-            if point[1] >= 20:
+            if point[1] >= 19:
                 can_move = False     
 
         for point in current_shape.points:
@@ -376,10 +377,8 @@ def move(direction):
 def keypress(event):
     global can_move, current_shape
 
-    if event.key == '<space>':
-        print("space")
-        #placement()
-        #instant placement
+    if event.key == u"\u0020": #reference to space-key in python
+        placement()
 
     if event.key == 'down':
         print("down button pressed")
