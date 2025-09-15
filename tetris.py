@@ -172,6 +172,7 @@ def draw(shape, form, screen):
         screen[coords[1]][coords[0]] = colour
 
 
+
 """background setting - allow all colours to set"""
 def background(size = grid_size):
     Z = [[0 for x in range(size)] for x in range(size)]
@@ -212,23 +213,18 @@ def movement(direction, shape = current_shape):
     if direction == "left":
 
         check_move('left')
-
-        if can_move == True:
-            change_coords(shape = current_shape, form = shape.form, centre = [shape.centre[0]-1, shape.centre[1]])
-        elif can_move == False:
-            pass
-        
+        move("left")
         set_new_Z()
             
     if direction == "right":
 
         check_move('right')
-        
-        if can_move == True:
-            change_coords(shape = current_shape, form = shape.form, centre = [shape.centre[0]+1, shape.centre[1]])
-        elif can_move == False:
-            pass
-        
+        move("right")
+        set_new_Z()
+    
+    if direction == "down":
+        check_move("down")
+        move("down")
         set_new_Z()
 
 def rotation(shape = current_shape):
@@ -341,20 +337,53 @@ def check_move(direction):
                     if point[0] + 1 == coord[0] and point[1] == coord[1]:
                         can_move = False
 
-def speed_place(x = frame_rate):
-    x = 100
+    if direction == "down":
+        for point in current_shape.points:
+            if point[1] >= 20:
+                can_move = False     
+
+        for point in current_shape.points:
+            for shapes in filled_tiles:
+                for coord in shapes.points:
+                    if point[1] + 1 == coord[1] and point[0] == coord[0]:
+                        can_move = False  
+
+def move(direction):
+    global can_move, current_shape
+
+    if direction == "left":
+        if can_move == True:
+            change_coords(shape = current_shape, form = current_shape.form, centre = [current_shape.centre[0]-1, current_shape.centre[1]])
+        elif can_move == False:
+            pass
+
+    if direction == "right":
+        if can_move == True:
+            change_coords(shape = current_shape, form = current_shape.form, centre = [current_shape.centre[0]+1, current_shape.centre[1]])
+        elif can_move == False:
+            pass
+
+    if direction == "down":
+        if can_move == True:
+            change_coords(shape = current_shape, form = current_shape.form, centre = [current_shape.centre[0], current_shape.centre[1]+2])
+            print("movement down")
+            print(current_shape.points)
+        elif can_move == False:
+            pass
+
+
 
 def keypress(event):
-    global frame_rate, can_move, current_shape
+    global can_move, current_shape
 
     if event.key == '<space>':
         print("space")
         #placement()
         #instant placement
+
     if event.key == 'down':
-        pass
-        #frame_rate = 100
-        #speed_place()
+        print("down button pressed")
+        movement("down")
     
     if event.key == 'up':
         rotation()
@@ -429,7 +458,6 @@ def Z_update(size = grid_size):
             Z[points[1]][points[0]] = shape.colour
 
     for point in current_shape.points:
-        print([point[1], point[0]])
         Z[point[1]][point[0]] = current_shape.colour
     return Z
 
@@ -462,10 +490,3 @@ image = ax.imshow(background(), origin = 'upper', cmap=cmap)
 
 ani = FuncAnimation(fig, run, frames = 100, interval = frame_rate, blit = False)
 plt.show()
-
-"""print("number of generated shapes: " + str(len(filled_tiles)+1))
-for shape in filled_tiles:
-    print("tiles on screen: " + str(shape.name) + ". Coords: " + str(shape.centre))
-print("current shape: " + str(current_shape.name) + ". Coods: " + str(current_shape.centre))
-
-print(str(current_shape.name) + str(current_shape.form))"""
