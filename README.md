@@ -34,7 +34,7 @@ Ball speeds up upon being hit by a players bat, speed slows down as it moves.
 |Bat down| s        | down     |
 
 
-## Tetris
+## Tetris - in progress
 Simple game of classic tetris with the pieces:
 
 <p align="center">
