@@ -47,6 +47,8 @@ Simple game of classic tetris with the pieces:
   <img src="https://github.com/EvaWXHenderson/Small-Games/blob/main/images/Screenshot%202025-09-05%20at%2015.36.52.png" width="95" /> 
 </p>
 
+![](https://github.com/EvaWXHenderson/Small-Games/blob/main/images/Tetris.gif)
+
 |Keys      |           |
 | ---      | ---       |
 |Rotate    |up arrow   |
