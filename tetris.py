@@ -14,6 +14,7 @@ loss = False
 choices = ['O', 'I', 'T', 'S', 'L', 'J', 'z']
 
 filled_tiles = []
+filled_tile_colours = []
 current_shape = ""
 
 screen_shapes = []
@@ -57,9 +58,9 @@ class Shape:
         if type == 'L':
             self.name = 'L'
             self.centre = centre
-            self.conformations = [[self.centre, [self.centre[0]-1, self.centre[1]], [self.centre[0]-2, self.centre[1]], [self.centre[0], self.centre[1]-1]],
+            self.conformations = [[self.centre, [self.centre[0]+1, self.centre[1]], [self.centre[0]+2, self.centre[1]], [self.centre[0], self.centre[1]+1]],
+                                  [self.centre, [self.centre[0]-1, self.centre[1]], [self.centre[0]-2, self.centre[1]], [self.centre[0], self.centre[1]-1]],
                                   [self.centre, [self.centre[0]+1, self.centre[1]], [self.centre[0], self.centre[1]-1], [self.centre[0], self.centre[1]-2]],
-                                  [self.centre, [self.centre[0]+1, self.centre[1]], [self.centre[0]+2, self.centre[1]], [self.centre[0], self.centre[1]+1]],
                                   [self.centre, [self.centre[0], self.centre[1]+1], [self.centre[0], self.centre[1]+2], [self.centre[0]-1, self.centre[1]]]]
             self.colour = 4
 
@@ -69,10 +70,11 @@ class Shape:
         if type == 'J':
             self.name = 'J'
             self.centre = centre
-            self.conformations = [[self.centre, [self.centre[0]-1, self.centre[1]], [self.centre[0]-2, self.centre[1]], [self.centre[0], self.centre[1]+1]],
-                                   [self.centre, [self.centre[0]-1, self.centre[1]], [self.centre[0], self.centre[1]-1], [self.centre[0], self.centre[1]-2]],
-                                   [self.centre, [self.centre[0]+1, self.centre[1]], [self.centre[0]+2, self.centre[1]], [self.centre[0], self.centre[1]-1]],
-                                   [self.centre, [self.centre[0], self.centre[1]+1], [self.centre[0]-1, self.centre[1]], [self.centre[0]-2, self.centre[1]]]]
+            self.conformations = [[self.centre, [self.centre[0]+1, self.centre[1]], [self.centre[0]+2, self.centre[1]], [self.centre[0], self.centre[1]-1]],
+                                  [self.centre, [self.centre[0], self.centre[1]+1], [self.centre[0]-1, self.centre[1]], [self.centre[0]-2, self.centre[1]]],
+                                  [self.centre, [self.centre[0]-1, self.centre[1]], [self.centre[0], self.centre[1]-1], [self.centre[0], self.centre[1]-2]],
+                                  [self.centre, [self.centre[0]-1, self.centre[1]], [self.centre[0]-2, self.centre[1]], [self.centre[0], self.centre[1]+1]]]
+                                   
             self.colour = 5
 
             self.form = 0
@@ -127,9 +129,9 @@ def change_coords(form, centre, shape = current_shape):
         
         if shape.name == "L":
             shape.centre = centre
-            shape.conformations = [[shape.centre, [shape.centre[0]-1, shape.centre[1]], [shape.centre[0]-2, shape.centre[1]], [shape.centre[0], shape.centre[1]-1]],
+            shape.conformations = [[shape.centre, [shape.centre[0]+1, shape.centre[1]], [shape.centre[0]+2, shape.centre[1]], [shape.centre[0], shape.centre[1]+1]],
+                                  [shape.centre, [shape.centre[0]-1, shape.centre[1]], [shape.centre[0]-2, shape.centre[1]], [shape.centre[0], shape.centre[1]-1]],
                                   [shape.centre, [shape.centre[0]+1, shape.centre[1]], [shape.centre[0], shape.centre[1]-1], [shape.centre[0], shape.centre[1]-2]],
-                                  [shape.centre, [shape.centre[0]+1, shape.centre[1]], [shape.centre[0]+2, shape.centre[1]], [shape.centre[0], shape.centre[1]+1]],
                                   [shape.centre, [shape.centre[0], shape.centre[1]+1], [shape.centre[0], shape.centre[1]+2], [shape.centre[0]-1, shape.centre[1]]]]
 
             shape.form = form
@@ -137,10 +139,10 @@ def change_coords(form, centre, shape = current_shape):
         
         if shape.name == "J":
             shape.centre = centre
-            shape.conformations = [[shape.centre, [shape.centre[0]-1, shape.centre[1]], [shape.centre[0]-2, shape.centre[1]], [shape.centre[0], shape.centre[1]+1]],
-                                   [shape.centre, [shape.centre[0]-1, shape.centre[1]], [shape.centre[0], shape.centre[1]-1], [shape.centre[0], shape.centre[1]-2]],
-                                   [shape.centre, [shape.centre[0]+1, shape.centre[1]], [shape.centre[0]+2, shape.centre[1]], [shape.centre[0], shape.centre[1]-1]],
-                                   [shape.centre, [shape.centre[0], shape.centre[1]+1], [shape.centre[0]-1, shape.centre[1]], [shape.centre[0]-2, shape.centre[1]]]]
+            shape.conformations = [[shape.centre, [shape.centre[0]+1, shape.centre[1]], [shape.centre[0]+2, shape.centre[1]], [shape.centre[0], shape.centre[1]-1]],
+                                  [shape.centre, [shape.centre[0], shape.centre[1]+1], [shape.centre[0]-1, shape.centre[1]], [shape.centre[0]-2, shape.centre[1]]],
+                                  [shape.centre, [shape.centre[0]-1, shape.centre[1]], [shape.centre[0], shape.centre[1]-1], [shape.centre[0], shape.centre[1]-2]],
+                                  [shape.centre, [shape.centre[0]-1, shape.centre[1]], [shape.centre[0]-2, shape.centre[1]], [shape.centre[0], shape.centre[1]+1]]]
 
             shape.form = form
             shape.points = shape.conformations[shape.form]
@@ -258,7 +260,8 @@ def redefine(shape = current_shape):
 
     past_shape = Shape(type = current_shape.name, centre = current_shape.centre, form = current_shape.form)
     
-    filled_tiles.append(past_shape)
+    filled_tiles.append(past_shape.points)
+    filled_tile_colours.append(past_shape.colour)
     
     choice = rand.choice(choices)
     
@@ -270,14 +273,13 @@ def placement():
     global filled_tiles, current_shape
     
     can_place = True
-    spaces = 0
 
     while can_place == True:
         change_coords(shape = current_shape, form = current_shape.form, centre = [current_shape.centre[0], current_shape.centre[1]+1])
         
         for point in current_shape.points:
-            for tiles in filled_tiles:
-                for coord in tiles.points:
+            for points in filled_tiles:
+                for coord in points:
                     if point[1] + 2 == coord[1] and point[0] == coord[0]:
                         can_place = False
         
@@ -285,6 +287,7 @@ def placement():
             if point[1] >= 19:
                 can_place = False
     
+    print(current_shape.points)
     set_new_Z()
 
 
@@ -304,9 +307,9 @@ def hit_shape():
     global current_shape, filled_tiles
 
     for point in current_shape.points:
-        for shapes in filled_tiles:
-            for tile in shapes.points:
-                if point[1] + 1 == tile[1] and point[0] == tile[0]:
+        for points in filled_tiles:
+            for coord in points:
+                if point[1] + 1 == coord[1] and point[0] == coord[0]:
                     current_shape = redefine()
                     print('shape change - hit other shape')
                     return
@@ -321,8 +324,8 @@ def check_move(direction):
                 can_move = False
 
         for point in current_shape.points:
-            for shapes in filled_tiles:
-                for coord in shapes.points:
+            for points in filled_tiles:
+                for coord in points:
                     if point[0] - 1 == coord[0] and point[1]== coord[1]:
                         can_move = False
 
@@ -333,8 +336,8 @@ def check_move(direction):
                 can_move = False
 
         for point in current_shape.points:
-            for shapes in filled_tiles:
-                for coord in shapes.points:
+            for points in filled_tiles:
+                for coord in points:
                     if point[0] + 1 == coord[0] and point[1] == coord[1]:
                         can_move = False
 
@@ -344,8 +347,8 @@ def check_move(direction):
                 can_move = False     
 
         for point in current_shape.points:
-            for shapes in filled_tiles:
-                for coord in shapes.points:
+            for points in filled_tiles:
+                for coord in points:
                     if point[1] + 1 == coord[1] and point[0] == coord[0]:
                         can_move = False  
 
@@ -408,17 +411,29 @@ def keypress(event):
 
 """checks"""
 def line_break():
-    pass
-    #if whole line is filled/complete whole line erases
+    global filled_tiles
+
+    for y in range(21):
+        tiles = 0
+        for x in range(21):
+            for points in filled_tiles:
+                for coord in points:
+                    if x == coord[0] and y == coord[1]:
+                        tiles +=1
+                        if tiles == 20:
+                            print('line full - line break')
+                            break
+                        
 
 def loss_check():
     global loss
     
-    for point in current_shape.points:
-        if point[1] <= 0:
-            print(point)
-            loss = True
-            break
+    for points in filled_tiles:
+        for coord in points:
+            if coord[1] <= 0:
+                print(coord)
+                loss = True
+                break
     
     if loss == True:
         print('you loose, womp womp.')
@@ -443,6 +458,8 @@ def check_error(error):
                 print(point)
                 #quit()
 
+def remove():
+    pass
 
 """animation"""
 def set_new_Z():
@@ -452,9 +469,9 @@ def set_new_Z():
 def Z_update(size = grid_size):
     Z = [[0 for x in range(size)] for x in range(size)]
     
-    for shape in filled_tiles:
-        for points in shape.points:
-            Z[points[1]][points[0]] = shape.colour
+    for x in range(len(filled_tiles)):
+        for coord in filled_tiles[x]:
+            Z[coord[1]][coord[0]] = filled_tile_colours[x]
 
     for point in current_shape.points:
         Z[point[1]][point[0]] = current_shape.colour
@@ -474,7 +491,8 @@ def run(x):
     Z = Z_update()
     image.set_data(Z)
 
-    #loss_check()
+    line_break()
+    loss_check()
 
 
 
@@ -489,3 +507,7 @@ image = ax.imshow(background(), origin = 'upper', cmap=cmap)
 
 ani = FuncAnimation(fig, run, frames = 100, interval = frame_rate, blit = False)
 plt.show()
+
+print(filled_tiles)
+for tiles in filled_tiles:
+    print(tiles.points)
