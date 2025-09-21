@@ -5,12 +5,15 @@ from matplotlib.animation import FuncAnimation
 import random as rand
 import time
 
-grid_size = 21
+grid_size = 20
 delt_t = 0.3
 
 frame_rate = 200
 
 loss = False
+#placed = False
+update = False
+coord_remove = []
 choices = ['O', 'I', 'T', 'S', 'L', 'J', 'z']
 
 filled_tiles = []
@@ -19,6 +22,7 @@ current_shape = ""
 
 screen_shapes = []
 shape_form = ""
+
 
 
 """defining shapes, their points of origin, conformation, colour, etc."""
@@ -165,16 +169,6 @@ def change_coords(form, centre, shape = current_shape):
 
 
 
-"""for drawing shapes and assigning colours""" 
-def draw(shape, form, screen):
-    points = shape.conformations[form] #a list of points corresponding to desired conformation (form)
-    colour = shape.colour #an integer colour output (1-7)
-
-    for coords in points:
-        screen[coords[1]][coords[0]] = colour
-
-
-
 """background setting - allow all colours to set"""
 def background(size = grid_size):
     Z = [[0 for x in range(size)] for x in range(size)]
@@ -187,13 +181,10 @@ def background(size = grid_size):
     Z[0][6] = 6
     Z[0][7] = 7
 
-    #draw(shape = current_shape , form = 1, screen=Z)
-
     ax.set_xticks([])
     ax.set_yticks([])
     
     return Z
-
 
 
 """actions"""
@@ -245,12 +236,29 @@ def rotation(shape = current_shape):
         elif current_shape.name == 'O':
             current_shape.form = 0
 
-        print(str(current_shape.name) + " " + str(current_shape.form))
+        for point in current_shape.points:
+            if point[1] >= 20:
+                print("shape rotation bring points below window")
+                pass
+        
+            if point[0] >= 20:
+                print("shape rotation bring points out of window")
+                pass
+            elif point[0] <= 0:
+                print("shape rotation bring points out of window")
+                pass
 
-        #for point in current_shape.points:
-            #if point[1] >= 20:
-                #print("shape rotation bring points below window")
-                #current_shape.centre[1] = 20
+            for points in filled_tiles:
+                for coord in points:
+                    if point[0]-1 == coord [0] and point[1] == points[1]:
+                        print("No rotation - will turn into shape to left")
+                        pass
+                    if point[0]+1 == coord [0] and point[1] == points[1]:
+                        print("No rotation - will turn into shape to right")
+                        pass
+                    if point[0] == coord [0] and point[1]-1 == points[1]:
+                        print("No rotation - will turn into shape to below")
+                        pass
         
         change_coords(shape = current_shape, form = current_shape.form, centre = current_shape.centre)
         set_new_Z()
@@ -265,7 +273,7 @@ def redefine(shape = current_shape):
     
     choice = rand.choice(choices)
     
-    new_shape = Shape(type = choice, centre = [10,0], form = 0) #data for shape stored in current_shape
+    new_shape = Shape(type = rand.choice(choices), centre = [10,0], form = 0) #data for shape stored in current_shape
                                                                     #creates shaped at top border in initial conformation (conformation 0)
     return new_shape
  
@@ -284,23 +292,22 @@ def placement():
                         can_place = False
         
         for point in current_shape.points:
-            if point[1] >= 19:
+            if point[1] >= 18:
                 can_place = False
-    
-    print(current_shape.points)
+
     set_new_Z()
 
 
 
 def hit_bottom():
-    global hit_b, current_shape
+    global hit_b, current_shape, placed
 
     for point in current_shape.points:
-        if point[1] >= 20: #hits bottom of window
-            #print(current_shape.points)
+        if point[1] >= 19: #hits bottom of window
             current_shape = redefine()
-            print('shape change - hit bottom of window')
+            #print('shape change - hit bottom of window')
             hit_b = True
+            #placed = True
             return
 
 def hit_shape():
@@ -311,7 +318,7 @@ def hit_shape():
             for coord in points:
                 if point[1] + 1 == coord[1] and point[0] == coord[0]:
                     current_shape = redefine()
-                    print('shape change - hit other shape')
+                    #placed = True
                     return
     
 def check_move(direction):
@@ -320,7 +327,7 @@ def check_move(direction):
     if direction == 'left':
         for point in current_shape.points:
             if point[0] <= 0:
-                print('shape at left boundary, cannot continue')
+                #print('shape at left boundary, cannot continue')
                 can_move = False
 
         for point in current_shape.points:
@@ -331,8 +338,8 @@ def check_move(direction):
 
     if direction == 'right':
         for point in current_shape.points:
-            if point[0] >= 20:
-                print('shape at right boundary, cannot continue')
+            if point[0] >= 19:
+                #print('shape at right boundary, cannot continue')
                 can_move = False
 
         for point in current_shape.points:
@@ -370,8 +377,7 @@ def move(direction):
     if direction == "down":
         if can_move == True:
             change_coords(shape = current_shape, form = current_shape.form, centre = [current_shape.centre[0], current_shape.centre[1]+2])
-            print("movement down")
-            print(current_shape.points)
+            #print("movement down")
         elif can_move == False:
             pass
 
@@ -384,7 +390,7 @@ def keypress(event):
         placement()
 
     if event.key == 'down':
-        print("down button pressed")
+        #print("down button pressed")
         movement("down")
     
     if event.key == 'up':
@@ -397,7 +403,6 @@ def keypress(event):
             movement(shape = current_shape, direction = "left")
         else:
             pass
-        print(current_shape.points)
    
     if event.key == 'right':
         check_move('right')
@@ -405,33 +410,73 @@ def keypress(event):
             movement(shape = current_shape, direction = "right")
         else:
             pass
-        print(current_shape.points)
 
 
 
 """checks"""
-def line_break():
-    global filled_tiles
+def check_full_line():
+    global filled_tiles, filled_tile_colours, update, coord_remove
+
+    restart = True
 
     for y in range(21):
-        tiles = 0
+        if restart == True:
+            restart = False
+            remove = []
+        
         for x in range(21):
             for points in filled_tiles:
                 for coord in points:
                     if x == coord[0] and y == coord[1]:
-                        tiles +=1
-                        if tiles == 20:
+                        remove.append([coord[0], coord[1]])
+                        if len(remove) == 20:
+                            for coord in range(20):
+                                coord_remove.append(remove[coord])
                             print('line full - line break')
-                            break
-                        
+                            update = True
+                        else:
+                            restart = True
+
+    #print("list or coords to remove: " + str(len(coord_remove)) + str(coord_remove) + "\n")
+    return coord_remove
+
+def line_break():
+    global filled_tiles, update
+
+    coord_remove = check_full_line()
+    
+    if update == True:
+        print('coordinates to remove: ' + str(len(coord_remove)) + " " + str(coord_remove) + "\n") #- 40 coordinates
+        print('filled tiles: ' + str(len(filled_tiles)) + " " + str(filled_tiles) + "\n") #- 10 sets of 4
+        print('colours: ' + str(len(filled_tile_colours)) + str(filled_tile_colours)) #- 10 colours (per shape)
+        
+        for y in range(len(coord_remove)):  
+            for x in range(len(filled_tiles)):
+                
+                if coord_remove[y] in filled_tiles[x]:
+                    print("coord remove: " + str(coord_remove[y]) + " filled tiles: " + str(filled_tiles[x]))                    
+                    list_remove = list(filled_tiles[x])
+                    print("list remove: " + str(list_remove))
+                    filled_tiles.remove(filled_tiles[x])
+
+                    #filled_tile_colours.remove(filled_tile_colours[x])
+
+                    list_remove.remove(coord_remove[y])
+                    filled_tiles.append(list_remove)
+
+                    #filled_tile_colours.append(filled_tile_colours[x])
+    
+        update = False
+    
+    set_new_Z()
 
 def loss_check():
     global loss
     
     for points in filled_tiles:
         for coord in points:
-            if coord[1] <= 0:
-                print(coord)
+            if coord[1] < 0:
+                print(coord[1])
                 loss = True
                 break
     
@@ -458,8 +503,7 @@ def check_error(error):
                 print(point)
                 #quit()
 
-def remove():
-    pass
+
 
 """animation"""
 def set_new_Z():
@@ -467,9 +511,11 @@ def set_new_Z():
     image.set_data(Z)
 
 def Z_update(size = grid_size):
+    global filled_tiles, filled_tile_colours, current_shape
+
     Z = [[0 for x in range(size)] for x in range(size)]
     
-    for x in range(len(filled_tiles)):
+    for x in range(len(filled_tile_colours)):
         for coord in filled_tiles[x]:
             Z[coord[1]][coord[0]] = filled_tile_colours[x]
 
@@ -480,23 +526,26 @@ def Z_update(size = grid_size):
 def run(x):
 
    #actions
+    
     movement(shape = current_shape, direction = "constant")
     check_error("above window")
     check_error("below window")
-    #print(str(current_shape.name) + str(current_shape.form) + str(current_shape.points))
 
     ax.set_xticks([])
     ax.set_yticks([])
 
     Z = Z_update()
     image.set_data(Z)
-
+    
+    #if placed == True:
     line_break()
+    
     loss_check()
 
 
 
-current_shape = Shape(type = rand.choice(choices), centre = [10,0], form = 0)
+current_shape = Shape(type = rand.choice(choices) , centre = [10,0], form = 0)
+#rand.choice(choices)
 
 fig, ax = plt.subplots(figsize = (5,5))
 cmap = ListedColormap(["white","yellowgreen","powderblue","khaki","indianred","thistle","lightpink","orange"])
@@ -507,7 +556,3 @@ image = ax.imshow(background(), origin = 'upper', cmap=cmap)
 
 ani = FuncAnimation(fig, run, frames = 100, interval = frame_rate, blit = False)
 plt.show()
-
-print(filled_tiles)
-for tiles in filled_tiles:
-    print(tiles.points)
