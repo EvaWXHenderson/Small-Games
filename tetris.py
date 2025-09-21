@@ -451,20 +451,18 @@ def line_break():
         print('colours: ' + str(len(filled_tile_colours)) + str(filled_tile_colours)) #- 10 colours (per shape)
         
         for y in range(len(coord_remove)):  
-            for x in range(len(filled_tiles)):
-                
+            for x in range(len(filled_tiles)):                
                 if coord_remove[y] in filled_tiles[x]:
                     print("coord remove: " + str(coord_remove[y]) + " filled tiles: " + str(filled_tiles[x]))                    
                     list_remove = list(filled_tiles[x])
                     print("list remove: " + str(list_remove))
                     filled_tiles.remove(filled_tiles[x])
-
-                    #filled_tile_colours.remove(filled_tile_colours[x])
-
                     list_remove.remove(coord_remove[y])
                     filled_tiles.append(list_remove)
-
-                    #filled_tile_colours.append(filled_tile_colours[x])
+                
+                remove_colour = filled_tile_colours[x]
+                filled_tile_colours.remove(filled_tile_colours[x])
+                filled_tile_colours.append(remove_colour)
     
         update = False
     
@@ -545,7 +543,6 @@ def run(x):
 
 
 current_shape = Shape(type = rand.choice(choices) , centre = [10,0], form = 0)
-#rand.choice(choices)
 
 fig, ax = plt.subplots(figsize = (5,5))
 cmap = ListedColormap(["white","yellowgreen","powderblue","khaki","indianred","thistle","lightpink","orange"])
