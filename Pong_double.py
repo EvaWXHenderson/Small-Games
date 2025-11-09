@@ -112,7 +112,6 @@ def collision_check():
 
     if bat_collision == True:
         speed_change = True
-        print('speed change')
     if bat_collision == False:
         speed_change = False
 
@@ -144,16 +143,16 @@ def loss_check():
 
     if ball_position[0] >= 60 and loss == True:
         print('Player 2 loses! \n Womp. Womp.') #LHS player
-        print(ball_position)
-        print(bat_position1)
+        #print(ball_position)
+        #print(bat_position1)
         image.set_data(Z)
         time.sleep(2)
         quit()
     
     if ball_position[0] <= 0 and loss == True:
         print('Player 1 loses! \n Womp. Womp.') #RHS player
-        print(ball_position)
-        print(bat_position2)
+        #print(ball_position)
+        #print(bat_position2)
         image.set_data(Z)
         time.sleep(2)
         quit()
